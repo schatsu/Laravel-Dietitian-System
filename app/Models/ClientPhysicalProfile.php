@@ -24,4 +24,17 @@ class ClientPhysicalProfile extends Model
     {
         return $this->belongsTo(Client::class, 'client_id');
     }
+
+    public function getGoalTypeFormattedAttribute(): string
+    {
+        return match ($this->goal_type)
+        {
+            GoalTypeEnum::WEIGHT_LOSS => 'Kilo Verme',
+            GoalTypeEnum::WEIGHT_GAIN => 'Kilo Alma',
+            GoalTypeEnum::WEIGHT_MAINTENANCE => 'Kilo Koruma',
+            GoalTypeEnum::MUSCLE_GAIN => 'Kas Kazanma',
+            GoalTypeEnum::HEALTHY_NUTRITION => 'Sağlıklı Beslenme',
+            GoalTypeEnum::BODY_SHAPING => 'Vücut Şekillendirme',
+        };
+    }
 }
