@@ -48,6 +48,10 @@ class Client extends Model
     {
         return $this->hasOne(ClientLifestyleProfile::class);
     }
+    public function payment(): HasOne
+    {
+        return $this->hasOne(ClientPayment::class);
+    }
 
     public function getStatusColorAttribute(): string
     {
