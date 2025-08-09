@@ -67,6 +67,13 @@ class AdminPanelProvider extends PanelProvider
                     ->config([]),
                 FilamentShieldPlugin::make(),
             ])
+            ->navigationGroups([
+                'Randevu Yönetimi',
+                'Danışan',
+                'Site',
+                'Blog',
+                'Kullanıcı Yönetimi',
+            ])
             ->authMiddleware([
                 Authenticate::class,
             ]);

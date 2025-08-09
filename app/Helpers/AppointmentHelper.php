@@ -9,9 +9,9 @@ use Illuminate\Support\Carbon;
 class AppointmentHelper
 {
     /**
-     * Haftalık programa göre belirli gün sayısı için slot üretir
      *
-     * @param int $days Kaç gün ileri için üretilecek (default 30)
+     *
+     * @param int $days
      * @return void
      */
     public static function generateSlots(int $days = 30): void
@@ -26,6 +26,8 @@ class AppointmentHelper
                 ->where('is_active', true)
                 ->get();
 
+            AppointmentSlot::query()->where('date', $date->toDateString())->delete();
+
             foreach ($schedules as $schedule) {
                 $start = Carbon::parse($date->toDateString() . ' ' . $schedule->start_time);
                 $end = Carbon::parse($date->toDateString() . ' ' . $schedule->end_time);
@@ -35,22 +37,19 @@ class AppointmentHelper
                     $slotStart = $start->format('H:i');
                     $slotEnd = $start->copy()->addMinutes($duration)->format('H:i');
 
-                    // Aynı slot var mı kontrol et
-                    $exists = AppointmentSlot::query()->where('date', $date->toDateString())
-                        ->where('start_time', $slotStart)
-                        ->where('end_time', $slotEnd)
-                        ->exists();
 
-                    if (!$exists) {
-                        AppointmentSlot::query()->create([
-                            'weekly_schedule_id' => $schedule->id,
+                    AppointmentSlot::query()->updateOrCreate(
+                        [
                             'date' => $date->toDateString(),
                             'start_time' => $slotStart,
                             'end_time' => $slotEnd,
+                        ],
+                        [
+                            'weekly_schedule_id' => $schedule->id,
                             'is_booked' => false,
                             'is_active' => true,
-                        ]);
-                    }
+                        ]
+                    );
 
                     $start->addMinutes($duration);
                 }

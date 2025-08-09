@@ -15,12 +15,11 @@ class ListAppointments extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
-        ];
-    }
-    protected function getHeaderWidgets(): array
-    {
-        return [
-            CalendarWidget::class,
+            Actions\Action::make('calendar')
+                ->label('Takvim Görünümü')
+                ->icon('heroicon-o-calendar')
+                ->color('danger')
+                ->url(static::getResource()::getUrl('calendar')),
         ];
     }
 }

@@ -9,12 +9,17 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Livewire\Attributes\On;
 
 class SlotsRelationManager extends RelationManager
 {
     protected static string $relationship = 'slots';
     protected static ?string $title = 'Slotlar';
     protected static ?string $label = 'Slot';
+
+    protected $listeners = [
+        'updateSlots' => '$refresh',
+    ];
 
     public function form(Form $form): Form
     {

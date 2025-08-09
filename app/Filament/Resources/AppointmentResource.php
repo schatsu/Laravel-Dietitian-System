@@ -43,6 +43,8 @@ class AppointmentResource extends Resource
                                 ->label('Randevu Tarihi')
                                 ->required()
                                 ->reactive()
+                                ->searchable()
+                                ->preload()
                                 ->options(function () {
                                     return AppointmentSlot::query()
                                         ->where('is_active', true)
@@ -55,6 +57,8 @@ class AppointmentResource extends Resource
                             Select::make('appointment_slot_id')
                             ->label('Randevu Saati')
                                 ->required()
+                                ->searchable()
+                                ->preload()
                                 ->disabled(fn (callable $get) => !$get('slot_date'))
                                 ->options(function (callable $get) {
                                     $date = $get('slot_date');
@@ -79,7 +83,7 @@ class AppointmentResource extends Resource
 
                             TextInput::make('phone')->label('Telefon')->prefix('+90')->mask('(999) 999 99 99')->maxLength(50),
 
-                            Textarea::make('note')->label('Not')->maxLength(1000)->columnSpanFull(),
+                            Textarea::make('note')->label('Not')->maxLength(1000),
                         ]),
                     ]),
             ]);
@@ -152,6 +156,7 @@ class AppointmentResource extends Resource
             'index' => Pages\ListAppointments::route('/'),
             'create' => Pages\CreateAppointment::route('/create'),
             'edit' => Pages\EditAppointment::route('/{record}/edit'),
+            'calendar' => Pages\AppointmentCalendar::route('/calendar'),
         ];
     }
 
