@@ -76,6 +76,7 @@ class AdminPanelProvider extends PanelProvider
                 'Blog',
                 'Kullanıcı Yönetimi',
             ])
+            ->sidebarCollapsibleOnDesktop()
             ->authMiddleware([
                 Authenticate::class,
             ]);

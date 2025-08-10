@@ -21,7 +21,6 @@ class ListClients extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
             Action::make('createClient')
                 ->label('Danışan Oluştur')
                 ->modalHeading('Yeni Danışan Oluştur')
