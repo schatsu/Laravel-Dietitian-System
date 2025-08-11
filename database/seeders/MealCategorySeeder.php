@@ -24,8 +24,14 @@ class MealCategorySeeder extends Seeder
             'İçecekler',
         ];
 
-        collect($categories)->each(function ($category) {
-            MealCategory::query()->create(['name' => $category]);
+        collect($categories)->each(function ($category, $index) {
+            MealCategory::query()->create([
+                'name' => $category,
+                'order' => $index + 1,
+                'is_popular' => false,
+                'status' => true,
+            ]);
         });
+
     }
 }

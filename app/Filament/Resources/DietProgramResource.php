@@ -20,8 +20,8 @@ class DietProgramResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Danışan';
-    protected static ?int $navigationSort = 3;
+    protected static ?string $navigationGroup = 'Diyet Programları';
+    protected static ?int $navigationSort = 1;
     protected static ?string $navigationLabel = 'Diyet Programları';
     protected static ?string $modelLabel = 'Diyet Programı';
     protected static ?string $pluralModelLabel = 'Diyet Programı';

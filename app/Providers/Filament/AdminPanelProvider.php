@@ -72,6 +72,7 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 'Randevu Yönetimi',
                 'Danışan',
+                'Diyet Programları',
                 'Site',
                 'Blog',
                 'Kullanıcı Yönetimi',
