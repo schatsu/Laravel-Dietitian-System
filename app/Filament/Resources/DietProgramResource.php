@@ -6,8 +6,17 @@ use App\Enums\DietProgramStatusEnum;
 use App\Filament\Resources\DietProgramResource\Pages;
 use App\Filament\Resources\DietProgramResource\RelationManagers;
 use App\Models\DietProgram;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Pages\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -25,12 +34,45 @@ class DietProgramResource extends Resource
     protected static ?string $navigationLabel = 'Diyet Programları';
     protected static ?string $modelLabel = 'Diyet Programı';
     protected static ?string $pluralModelLabel = 'Diyet Programı';
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::End;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                Section::make('Program Bilgileri')
+                    ->schema([
+                        Grid::make()
+                            ->schema([
+                                Select::make('client_id')
+                                    ->label('Danışan Seçiniz')
+                                    ->relationship('client', 'first_name')
+                                    ->getOptionLabelFromRecordUsing(fn($record) => $record->full_name)
+                                    ->searchable()
+                                    ->preload()
+                                    ->required(),
+                                TextInput::make('name')
+                                    ->label('Program Adı')
+                                    ->required()
+                                    ->maxLength(150),
+                                DatePicker::make('start_date')
+                                    ->label('Başlangıç Tarihi')
+                                    ->native(false)
+                                    ->required(),
+                                DatePicker::make('target_date')
+                                    ->label('Hedef Tarihi')
+                                    ->native(false)
+                                    ->required(),
+                                Select::make('status')
+                                    ->label('Durum')
+                                    ->options(DietProgramStatusEnum::labels())
+                                    ->required(),
+                                Textarea::make('program_notes')
+                                    ->label('Notlar')
+                                    ->nullable()
+                                    ->maxLength(500),
+                            ])
+                    ])
             ]);
     }
 
@@ -90,6 +132,13 @@ class DietProgramResource extends Resource
             'edit' => Pages\EditDietProgram::route('/{record}/edit'),
             'program' => Pages\DietProgramEditor::route('/{record}/program'),
         ];
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\DietProgramEditor::class,
+        ]);
     }
 
     public static function getNavigationBadge(): ?string

@@ -10,7 +10,9 @@ use App\Models\DietProgram;
 use App\Models\DietProgramItem;
 use App\Models\Meal;
 use App\Models\MealCategory;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
+use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
@@ -21,7 +23,9 @@ class DietProgramEditor extends Page
 
     protected static string $view = 'filament.resources.diet-program-resource.pages.diet-program-editor';
 
-    protected static ?string $title = 'Diyet Programı Editörü';
+    protected static ?string $title = 'Diyet Programı Oluştur';
+    protected static ?string $navigationLabel = 'Diyet Programı Oluşturucu';
+    protected static ?string $navigationIcon = 'heroicon-o-pencil-square';
 
     public DietProgram $dietProgram;
 
@@ -29,8 +33,6 @@ class DietProgramEditor extends Page
     public array $days = [];
     public array $times = [];
 
-    // Modal state'leri
-    public bool $showAddMealModal = false;
     public string $selectedDay = '';
     public string $selectedTime = '';
     public string $selectedDayLabel = '';
@@ -42,10 +44,9 @@ class DietProgramEditor extends Page
 
         $this->days = ProgramDayEnum::options();
         $this->times = MealTimeEnum::options();
-
         $this->loadTable();
-    }
 
+    }
     protected function getHeaderActions(): array
     {
         return [
@@ -87,16 +88,8 @@ class DietProgramEditor extends Page
             Action::make('back')
                 ->label('Geri Dön')
                 ->icon('heroicon-o-arrow-left')
-                ->color('gray')
-                ->url(static::getResource()::getUrl('index')),
-
-            Action::make('preview')
-                ->label('Önizleme')
-                ->icon('heroicon-o-eye')
-                ->color('info')
-                ->action(function () {
-                    $this->previewProgram();
-                }),
+                ->color('warning')
+                ->url(static::getResource()::getUrl('edit', ['record' => $this->dietProgram])),
         ];
     }
 
@@ -107,22 +100,19 @@ class DietProgramEditor extends Page
         $this->selectedTime = $time;
         $this->selectedDayLabel = $this->days[$day] ?? $day;
         $this->selectedTimeLabel = $this->times[$time] ?? $time;
-        $this->showAddMealModal = true;
 
-        // Frontend'e modal açılması için sinyal gönder
-        $this->dispatch('open-add-meal-modal');
+        $this->dispatch('open-modal', id: 'addMealModal');
     }
-
     // Modal kapatma
     public function closeAddMealModal(): void
     {
-        $this->showAddMealModal = false;
         $this->selectedDay = '';
         $this->selectedTime = '';
         $this->selectedDayLabel = '';
         $this->selectedTimeLabel = '';
-    }
 
+        $this->dispatch('close-modal', id: 'addMealModal');
+    }
     // Hızlı yemek ekleme
     public function quickAddMeal(int $mealId): void
     {
@@ -135,7 +125,7 @@ class DietProgramEditor extends Page
             return;
         }
 
-        $meal = Meal::find($mealId);
+        $meal = Meal::query()->find($mealId);
         if (!$meal) {
             Notification::make()
                 ->title('Hata!')
@@ -154,6 +144,26 @@ class DietProgramEditor extends Page
         );
 
         $this->closeAddMealModal();
+    }
+    public function addMealToSlot(string $day, string $mealTime, int $mealId, float $quantity = null, string $unit = null): void
+    {
+        $meal = Meal::query()->select('id', 'name', 'default_quantity', 'unit')->findOrFail($mealId);
+
+        $this->dietProgram->items()->create([
+            'meal_id' => $meal->id,
+            'day' => $day,
+            'meal_time' => $mealTime,
+            'quantity' => $quantity ?? $meal->default_quantity,
+            'unit' => $unit ?? $meal->unit->value,
+        ]);
+
+        $this->loadTable();
+
+        Notification::make()
+            ->title('✅ Yemek eklendi!')
+            ->body("'{$meal->name}' başarıyla {$this->days[$day]} - {$this->times[$mealTime]} slotuna eklendi.")
+            ->success()
+            ->send();
     }
 
     public function shareProgram(array $data): void
@@ -204,6 +214,20 @@ class DietProgramEditor extends Page
 
     private function downloadAsPdf(): void
     {
+        $pdf = Pdf::loadView('filament.resources.diet-program-resource.pages.diet-program-pdf', [
+            'dietProgram' => $this->dietProgram,
+            'days' => $this->days,
+            'times' => $this->times,
+            'table' => $this->table,
+        ]);
+
+        // PDF indirme yanıtını döndür
+        response()->streamDownload(
+            fn () => print($pdf->output()),
+            'diyet_programi_' . $this->dietProgram->id . '.pdf',
+            ['Content-Type' => 'application/pdf']
+        )->send();
+
         Notification::make()
             ->title('PDF indiriliyor!')
             ->body('Diyet programı PDF formatında indiriliyor...')
@@ -224,11 +248,6 @@ class DietProgramEditor extends Page
             ->send();
     }
 
-    public function previewProgram(): void
-    {
-        $this->dispatch('openPreviewModal');
-    }
-
     public function loadTable(): void
     {
         $items = $this->dietProgram->items()
@@ -241,13 +260,12 @@ class DietProgramEditor extends Page
         foreach ($items as $item) {
             $day = $item->day->value;
             $time = $item->meal_time->value;
-            $unitLabel = MealUnitEnum::from($item->unit)->label();
 
             $this->table[$day][$time][] = [
                 'id' => $item->id,
                 'meal_name' => $item->meal->name,
                 'quantity' => $item->quantity,
-                'unit' => $unitLabel,
+                'unit' => $item->unit_label,
             ];
         }
     }
@@ -255,27 +273,6 @@ class DietProgramEditor extends Page
     public function getItems(string $day, string $time): array
     {
         return $this->table[$day][$time] ?? [];
-    }
-
-    public function addMealToSlot(string $day, string $mealTime, int $mealId, float $quantity = null, string $unit = null): void
-    {
-        $meal = Meal::query()->select('id', 'name', 'default_quantity', 'unit')->findOrFail($mealId);
-
-        $this->dietProgram->items()->create([
-            'meal_id' => $meal->id,
-            'day' => $day,
-            'meal_time' => $mealTime,
-            'quantity' => $quantity ?? $meal->default_quantity,
-            'unit' => $unit ?? $meal->unit->value,
-        ]);
-
-        $this->loadTable();
-
-        Notification::make()
-            ->title('✅ Yemek eklendi!')
-            ->body("'{$meal->name}' başarıyla {$this->days[$day]} - {$this->times[$mealTime]} slotuna eklendi.")
-            ->success()
-            ->send();
     }
 
     public function removeItem(int $itemId): void
@@ -307,7 +304,6 @@ class DietProgramEditor extends Page
         $this->loadTable();
     }
 
-    // Kategorilere göre yemekleri getir
     public function getMealsByCategory(): Collection
     {
         return MealCategory::query()
@@ -319,50 +315,6 @@ class DietProgramEditor extends Page
             ->orderBy('name')
             ->get();
     }
-
-    // En çok kullanılan yemekleri getir (modal için)
-    public function getPopularMeals(): Collection
-    {
-        // En çok kullanılan yemekleri getirmek için DietProgramItem'dan sayım yapalım
-        $popularMealIds = DietProgramItem::query()
-            ->select('meal_id')
-            ->selectRaw('COUNT(*) as usage_count')
-            ->groupBy('meal_id')
-            ->orderByDesc('usage_count')
-            ->limit(12)
-            ->pluck('meal_id');
-
-        // Eğer hiç kullanılmış yemek yoksa, ilk 12 yemeği döndür
-        if ($popularMealIds->isEmpty()) {
-            return Meal::query()
-                ->select('id', 'name', 'meal_category_id', 'default_quantity', 'unit')
-                ->with('category:id,name')
-                ->limit(12)
-                ->get();
-        }
-
-        return Meal::query()
-            ->select('id', 'name', 'meal_category_id', 'default_quantity', 'unit')
-            ->with('category:id,name')
-            ->whereIn('id', $popularMealIds)
-            ->get();
-    }
-
-    // Seeder'dan örnek yemekler (eğer popüler yemek yoksa)
-    public function getSampleMeals(): Collection
-    {
-        return Meal::query()
-            ->select('id', 'name', 'meal_category_id', 'default_quantity', 'unit')
-            ->with('category:id,name')
-            ->whereIn('name', [
-                'Yumurta', 'Beyaz Peynir', 'Domates', 'Haşlanmış Tavuk',
-                'Mercimek Çorbası', 'Yoğurt', 'Muz', 'Zeytin',
-                'Kuru Fasulye', 'Ayran'
-            ])
-            ->limit(12)
-            ->get();
-    }
-
     public function openShareModal(): void
     {
         $this->dispatch('openShareModal');

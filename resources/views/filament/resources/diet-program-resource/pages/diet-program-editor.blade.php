@@ -84,21 +84,15 @@
                                                 <button
                                                     wire:click="removeItem({{ $item['id'] }})"
                                                     type="button"
-                                                    class="opacity-0 group-hover/item:opacity-100 p-2 hover:bg-gradient-to-r hover:from-red-100 hover:to-pink-100 dark:hover:from-red-900/30 dark:hover:to-pink-900/30 rounded-full transition-all duration-300 text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:shadow-lg hover:scale-110"
-                                                    title="Yemeği Sil"
+                                                    class="p-2 hover:bg-gradient-to-r hover:from-red-100 hover:to-pink-100 dark:hover:from-red-900/30 dark:hover:to-pink-900/30 rounded-full transition-all duration-300 text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:shadow-lg hover:scale-110"
+                                                    title="Kaldır"
                                                 >
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                                     </svg>
                                                 </button>
-                                            </div>
 
-                                            {{-- Yemek sayısı badge --}}
-                                            @if($loop->parent->first)
-                                                <div class="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-orange-400 to-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                                                    {{ $loop->parent->count }}
-                                                </div>
-                                            @endif
+                                            </div>
                                         </div>
                                     @empty
                                         {{-- Boş durum - yemek ekleme butonu --}}
@@ -134,7 +128,7 @@
             <div class="flex items-center justify-between text-sm">
                 <div class="flex items-center gap-4">
                     <span class="text-gray-600 dark:text-gray-400">
-                        📊 Toplam: <strong class="text-primary-600">{{ collect($table)->flatten(2)->count() }}</strong> yemek
+                        📊 Toplam: <strong class="text-primary-600">{{ collect($table)->flatten(2)->count() }}</strong> besin
                     </span>
                     <span class="text-gray-600 dark:text-gray-400">
                         📅 <strong class="text-green-600">{{ count($days) }}</strong> gün
@@ -151,168 +145,91 @@
     </x-filament-tables::container>
 
     {{-- Geliştirilmiş Yemek Ekleme Modalı --}}
-    @if($showAddMealModal)
-        <div
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300"
-            style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);"
-            wire:click="closeAddMealModal"
+        <x-filament::modal
+            id="addMealModal"
+            width="5xl"
         >
-            <div
-                class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-300 border border-gray-200 dark:border-gray-700"
-                wire:click.stop
-            >
-                {{-- Modern Modal Header --}}
-                <div class="relative p-6 bg-gradient-to-r from-primary-600 via-primary-700 to-primary-600 text-white">
-                    <div class="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-blue-600/20"></div>
-                    <div class="relative flex items-center justify-between">
-                        <div class="flex items-center gap-4">
-                            <div class="p-3 bg-white/20 rounded-full">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold">Yemek Seç</h3>
-                                <p class="text-sm opacity-90 mt-1 flex items-center gap-2">
-                                    <span class="inline-flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full text-xs">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                        {{ $selectedDayLabel }}
-                                    </span>
-                                    <span class="inline-flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full text-xs">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                        {{ $selectedTimeLabel }}
-                                    </span>
-                                </p>
-                            </div>
-                        </div>
-                        <button
-                            wire:click="closeAddMealModal"
-                            class="p-2 hover:bg-white/20 rounded-full transition-all duration-200 hover:rotate-90"
-                        >
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
+            <x-slot name="header">
+                Besin Ekle <br>
+                {{$selectedDayLabel . ' • ' . $selectedTimeLabel}}
+            </x-slot>
+            {{-- Modal Body --}}
+            <div class="space-y-4">
+                <div class="flex items-center gap-3 mb-6">
+                    <h4 class="text-lg font-bold">Kategoriler</h4>
                 </div>
 
-                {{-- Modal Body - Tabbed Content --}}
-                <div class="overflow-y-auto max-h-[calc(85vh-140px)]">
-                    {{-- Quick Actions - Popüler Yemekler --}}
-                    <div class="p-6 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="p-2 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg text-white">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="text-lg font-bold text-gray-900 dark:text-white">Hızlı Seçim</h4>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">En çok kullanılan yemekler</p>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-                            @foreach($this->getPopularMeals() as $meal)
-                                <button
-                                    wire:click="quickAddMeal({{ $meal->id }})"
-                                    class="group relative p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg transition-all duration-200 hover:scale-105 text-left"
-                                >
-                                    <div class="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-blue-50/50 dark:from-primary-900/10 dark:to-blue-900/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-                                    <div class="relative">
-                                        <div class="font-bold text-gray-900 dark:text-white text-sm mb-2 line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                                            {{ $meal->name }}
-                                        </div>
-                                        <div class="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 rounded-full text-xs font-medium">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                            </svg>
-                                            {{ $meal->default_quantity }} {{ $meal->unit->label() }}
-                                        </div>
-                                        @if($meal->category)
-                                            <div class="mt-2 text-xs text-primary-600 dark:text-primary-400 font-medium bg-primary-50 dark:bg-primary-900/20 px-2 py-1 rounded-full inline-block">
-                                                {{ $meal->category->name }}
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- Hover Effect --}}
-                                    <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-                                </button>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    {{-- Kategorilere Göre Yemekler --}}
-                    <div class="p-6 space-y-6">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="p-2 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-lg text-white">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="text-lg font-bold text-gray-900 dark:text-white">Kategoriler</h4>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">Tüm yemekleri kategorilere göre görüntüle</p>
-                            </div>
-                        </div>
-
-                        @foreach($this->getMealsByCategory() as $category)
-                            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
-                                <div class="flex items-center gap-3 mb-4">
-                                    <div class="w-8 h-8 bg-gradient-to-br from-gray-400 to-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                        {{ substr($category->name, 0, 1) }}
-                                    </div>
-                                    <h5 class="text-lg font-bold text-gray-900 dark:text-white">{{ $category->name }}</h5>
-                                    <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 rounded-full text-xs font-medium">
-                                        {{ $category->meals->count() }} yemek
-                                    </span>
-                                </div>
-
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                    @foreach($category->meals as $meal)
-                                        <button
-                                            wire:click="quickAddMeal({{ $meal->id }})"
-                                            class="group p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all duration-200 hover:scale-105 text-left"
-                                        >
-                                            <div class="font-semibold text-gray-900 dark:text-white text-sm mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-2">
-                                                {{ $meal->name }}
-                                            </div>
-                                            <div class="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 rounded-full text-xs font-medium">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                                </svg>
-                                                {{ $meal->default_quantity }} {{ $meal->unit->label() }}
-                                            </div>
-                                        </button>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                {{-- Modal Footer --}}
-                <div class="p-6 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <div class="text-sm text-gray-600 dark:text-gray-400">
-                        💡 <strong>İpucu:</strong> Yemeklere tıklayarak hızlıca ekleyebilirsiniz
-                    </div>
-                    <button
-                        wire:click="closeAddMealModal"
-                        class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium"
+                @foreach($this->getMealsByCategory() as $index => $category)
+                    <div
+                        x-data="{ open: false }"
+                        class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden"
                     >
-                        Kapat
-                    </button>
-                </div>
-            </div>
-        </div>
-    @endif
+                        {{-- Accordion Başlık --}}
+                        <button
+                            type="button"
+                            @click="open = !open"
+                            class="w-full flex items-center justify-between px-5 py-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        >
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 font-bold text-sm">
+                                    {{ mb_substr($category->name, 0, 1) }}
+                                </div>
+                                <span class="font-medium text-gray-800 dark:text-gray-200">
+                        {{ $category->name }}
+                    </span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ $category->meals->count() }} besin
+                    </span>
+                                <svg
+                                    :class="{'rotate-180': open}"
+                                    class="w-4 h-4 text-gray-500 transition-transform duration-200"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </button>
 
+                        {{-- Accordion İçerik --}}
+                        <div
+                            x-show="open"
+                            x-transition
+                            class="px-5 py-3 ps-2 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700"
+                        >
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                @foreach($category->meals as $meal)
+                                    <button
+                                        wire:click="quickAddMeal({{ $meal->id }})"
+                                        class="flex items-center justify-between w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-primary-50 hover:border-primary-400 dark:hover:bg-primary-900/20 transition-colors duration-200 shadow-sm"
+                                    >
+                            <span class="text-sm font-medium text-gray-350 dark:text-gray-300">
+                                {{ $meal->name }}
+                            </span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                                {{ $meal->default_quantity }} {{ $meal->unit->label() }}
+                            </span>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+            {{-- Modal Footer --}}
+            <x-slot name="footer">
+                <x-filament::button
+                    color="danger"
+                    wire:click="closeAddMealModal"
+                >
+                    Kapat
+                </x-filament::button>
+            </x-slot>
+        </x-filament::modal>
     {{-- JavaScript kodları --}}
     @script
     <script>
@@ -326,30 +243,6 @@
             navigator.clipboard.writeText(data[0].text).then(() => {
                 console.log('Link kopyalandı:', data[0].text);
             });
-        });
-
-        // Önizleme modalı
-        $wire.on('openPreviewModal', () => {
-            console.log('Önizleme modalı açıldı');
-        });
-
-        // Modal açma - body scroll engelleme
-        $wire.on('open-add-meal-modal', () => {
-            document.body.style.overflow = 'hidden';
-        });
-
-        // Sayfa yüklendiğinde body overflow'u resetle
-        window.addEventListener('load', () => {
-            if (!@this.showAddMealModal) {
-                document.body.style.overflow = '';
-            }
-        });
-
-        // Modal kapandığında scroll'u geri aç
-        window.addEventListener('livewire:updated', () => {
-            if (!@this.showAddMealModal) {
-                document.body.style.overflow = '';
-            }
         });
     </script>
     @endscript

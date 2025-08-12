@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\MealTimeEnum;
+use App\Enums\MealUnitEnum;
 use App\Enums\ProgramDayEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -36,4 +37,10 @@ class DietProgramItem extends Model
     {
         return $this->belongsTo(Meal::class);
     }
+
+    public function getUnitLabelAttribute(): string
+    {
+        return MealUnitEnum::from($this->unit)->label();
+    }
+
 }
