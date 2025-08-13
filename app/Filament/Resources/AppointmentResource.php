@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\AppointmentStatusEnum;
 use App\Filament\Resources\AppointmentResource\Pages;
 use App\Filament\Resources\AppointmentResource\RelationManagers;
 use App\Filament\Resources\AppointmentResource\Widgets\CalendarWidget;
@@ -82,8 +83,12 @@ class AppointmentResource extends Resource
                             TextInput::make('email')->label('E-posta')->email()->prefix('@')->maxLength(255),
 
                             TextInput::make('phone')->label('Telefon')->prefix('+90')->mask('(999) 999 99 99')->maxLength(50),
+                            Select::make('status')->label('Durum')
+                                ->options(AppointmentStatusEnum::options()),
 
-                            Textarea::make('note')->label('Not')->maxLength(1000),
+                            Textarea::make('note')->label('Not')
+                                ->columnSpanFull()
+                                ->maxLength(1000),
                         ]),
                     ]),
             ]);
@@ -123,6 +128,11 @@ class AppointmentResource extends Resource
                     ->sortable()
                     ->copyable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Durum')
+                    ->formatStateUsing(fn(AppointmentStatusEnum $state) => $state->label())
+                    ->badge()
+                    ->color(fn(AppointmentStatusEnum $state) => $state->color()),
 
                 TextColumn::make('note')
                     ->label('Not')

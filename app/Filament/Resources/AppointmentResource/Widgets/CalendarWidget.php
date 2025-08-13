@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AppointmentResource\Widgets;
 
+use App\Enums\AppointmentStatusEnum;
 use App\Models\Appointment;
 use App\Models\AppointmentSlot;
 use Filament\Actions\Action;
@@ -21,6 +22,7 @@ use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 class CalendarWidget extends FullCalendarWidget
 {
     public string|null|Model $model = Appointment::class;
+
     public function fetchEvents(array $fetchInfo): array
     {
         return Appointment::with('slot')
@@ -29,20 +31,36 @@ class CalendarWidget extends FullCalendarWidget
             })
             ->get()
             ->map(function (Appointment $appointment) {
-                $color = $appointment->slot->is_active
-                    ? '#3490dc'
-                    : '#95a5a6';
+                $colorMap = [
+                    'success' => '#28a745', // Onaylandı
+                    'warning' => '#ffc107', // Beklemede
+                    'danger' => '#dc3545', // Reddedildi
+                ];
 
                 return [
-                    'id'    => $appointment->id,
+                    'id' => $appointment->id,
                     'title' => $appointment->name,
                     'start' => $appointment->slot->date . 'T' . $appointment->slot->start_time,
-                    'end'   => $appointment->slot->date . 'T' . $appointment->slot->end_time,
-                    'color' => $color,
+                    'end' => $appointment->slot->date . 'T' . $appointment->slot->end_time,
+                    'color' => $colorMap[$appointment->status->color()],
+                    'backgroundColor' => $colorMap[$appointment->status->color()],
+                    'borderColor' => $colorMap[$appointment->status->color()],
+                    'textColor' => '#fff',
                 ];
             })
             ->toArray();
     }
+
+    public function eventDidMount(): string
+    {
+        return <<<JS
+        function({ event, timeText, isStart, isEnd, isMirror, isPast, isFuture, isToday, el, view }){
+            el.setAttribute("x-tooltip", "tooltip");
+            el.setAttribute("x-data", "{ tooltip: '"+event.title+"' }");
+        }
+    JS;
+    }
+
     protected function headerActions(): array
     {
         return [
@@ -51,6 +69,7 @@ class CalendarWidget extends FullCalendarWidget
                 ->modalHeading('Randevu Oluştur'),
         ];
     }
+
     protected function modalActions(): array
     {
         return [
@@ -73,6 +92,7 @@ class CalendarWidget extends FullCalendarWidget
             DeleteAction::make(),
         ];
     }
+
     protected function viewAction(): Action
     {
         return ViewAction::make()
@@ -91,6 +111,7 @@ class CalendarWidget extends FullCalendarWidget
                 return $data;
             });
     }
+
     public function getFormSchema(): array
     {
         return [
@@ -117,7 +138,7 @@ class CalendarWidget extends FullCalendarWidget
                             ->required()
                             ->searchable()
                             ->preload()
-                            ->disabled(fn (callable $get) => !$get('slot_date'))
+                            ->disabled(fn(callable $get) => !$get('slot_date'))
                             ->options(function (callable $get) {
                                 $date = $get('slot_date');
                                 if (!$date) {
@@ -130,15 +151,20 @@ class CalendarWidget extends FullCalendarWidget
                                     ->where('is_booked', false)
                                     ->orderBy('start_time')
                                     ->get()
-                                    ->mapWithKeys(fn ($slot) => [
+                                    ->mapWithKeys(fn($slot) => [
                                         $slot->id => $slot->start_time . ' - ' . $slot->end_time,
                                     ]);
                             }),
 
+
                         TextInput::make('name')->label('Danışan Adı')->required()->maxLength(255),
                         TextInput::make('email')->label('E-posta')->email()->prefix('@')->maxLength(255),
                         TextInput::make('phone')->label('Telefon')->prefix('+90')->mask('(999) 999 99 99')->maxLength(50),
-                        Textarea::make('note')->label('Not')->maxLength(1000),
+                        Select::make('status')->label('Durum')
+                            ->options(AppointmentStatusEnum::options()),
+                        Textarea::make('note')->label('Not')
+                            ->columnSpanFull()
+                            ->maxLength(1000),
                     ]),
                 ]),
         ];

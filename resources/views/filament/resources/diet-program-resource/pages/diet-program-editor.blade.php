@@ -58,7 +58,7 @@
                                 <div class="absolute inset-0 opacity-5 bg-gradient-to-br from-primary-200 to-transparent pointer-events-none"></div>
 
                                 <div class="space-y-2 min-h-[110px] relative z-10">
-                                    @forelse($this->getItems($dayKey, $timeKey) as $item)
+                                    @foreach($this->getItems($dayKey, $timeKey) as $item)
                                         <div
                                             class="group/item relative bg-gradient-to-br from-white via-blue-50/50 to-indigo-50/50 dark:from-gray-800 dark:via-blue-900/10 dark:to-indigo-900/10 rounded-xl p-3 border border-blue-200/60 dark:border-blue-700/40 hover:shadow-xl hover:scale-[1.03] hover:-translate-y-1 transition-all duration-300 backdrop-blur-sm"
                                         >
@@ -74,11 +74,11 @@
                                             <div class="relative flex items-center justify-between">
                                                 {{-- Miktar --}}
                                                 <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-100 via-teal-100 to-cyan-100 text-emerald-800 dark:from-emerald-900/40 dark:via-teal-900/40 dark:to-cyan-900/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700 shadow-sm">
-                                                    <svg class="w-3 h-3 mr-1.5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                                    </svg>
-                                                    {{ $item['quantity'] }} {{ $item['unit'] }}
-                                                </span>
+                    <svg class="w-3 h-3 mr-1.5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                    {{ $item['quantity'] }} {{ $item['unit'] }}
+                </span>
 
                                                 {{-- Sil butonu --}}
                                                 <button
@@ -91,30 +91,30 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                                     </svg>
                                                 </button>
-
                                             </div>
                                         </div>
-                                    @empty
-                                        {{-- Boş durum - yemek ekleme butonu --}}
-                                        <button
-                                            wire:click="openAddMealModal('{{ $dayKey }}', '{{ $timeKey }}')"
-                                            class="flex items-center justify-center h-full min-h-[110px] w-full border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-primary-400 dark:hover:border-primary-500 hover:bg-gradient-to-br hover:from-primary-50/20 hover:to-blue-50/20 dark:hover:from-primary-900/10 dark:hover:to-blue-900/10 transition-all duration-300 group/empty cursor-pointer"
-                                        >
-                                            <div class="text-center py-6">
-                                                <div class="relative mb-3">
-                                                    <svg class="w-10 h-10 text-gray-400 dark:text-gray-500 mx-auto group-hover/empty:text-primary-500 transition-colors duration-300 group-hover/empty:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                                    </svg>
-                                                    <div class="absolute inset-0 bg-gradient-to-br from-primary-200/20 to-blue-200/20 rounded-full opacity-0 group-hover/empty:opacity-100 transition-opacity duration-300 animate-pulse"></div>
-                                                </div>
-                                                <p class="text-xs text-gray-500 dark:text-gray-400 group-hover/empty:text-primary-600 dark:group-hover/empty:text-primary-400 transition-colors duration-300 font-semibold">
-                                                    <span class="block">✨ Yemek eklemek için</span>
-                                                    <span class="block font-bold">tıklayın</span>
-                                                </p>
+                                    @endforeach
+
+                                    {{-- Yemek ekleme butonu (her zaman görünsün) --}}
+                                    <button
+                                        wire:click="openAddMealModal('{{ $dayKey }}', '{{ $timeKey }}')"
+                                        class="flex items-center justify-center h-full min-h-[110px] w-full border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-primary-400 dark:hover:border-primary-500 hover:bg-gradient-to-br hover:from-primary-50/20 hover:to-blue-50/20 dark:hover:from-primary-900/10 dark:hover:to-blue-900/10 transition-all duration-300 group/empty cursor-pointer"
+                                    >
+                                        <div class="text-center py-6">
+                                            <div class="relative mb-3">
+                                                <svg class="w-10 h-10 text-gray-400 dark:text-gray-500 mx-auto group-hover/empty:text-primary-500 transition-colors duration-300 group-hover/empty:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                </svg>
+                                                <div class="absolute inset-0 bg-gradient-to-br from-primary-200/20 to-blue-200/20 rounded-full opacity-0 group-hover/empty:opacity-100 transition-opacity duration-300 animate-pulse"></div>
                                             </div>
-                                        </button>
-                                    @endforelse
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 group-hover/empty:text-primary-600 dark:group-hover/empty:text-primary-400 transition-colors duration-300 font-semibold">
+                                                <span class="block">✨ Yemek eklemek için</span>
+                                                <span class="block font-bold">tıklayın</span>
+                                            </p>
+                                        </div>
+                                    </button>
                                 </div>
+
                             </x-filament-tables::cell>
                         @endforeach
                     </x-filament-tables::row>
@@ -146,6 +146,7 @@
 
     {{-- Geliştirilmiş Yemek Ekleme Modalı --}}
         <x-filament::modal
+            slide-over="right"
             id="addMealModal"
             width="5xl"
         >

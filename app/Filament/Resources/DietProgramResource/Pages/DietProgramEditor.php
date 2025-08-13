@@ -58,32 +58,8 @@ class DietProgramEditor extends Page
                 ->modalHeading('Diyet Programını Paylaş')
                 ->modalDescription('Bu diyet programını nasıl paylaşmak istiyorsunuz?')
                 ->modalSubmitActionLabel('Paylaş')
-                ->modalCancelActionLabel('İptal')
-                ->form([
-                    \Filament\Forms\Components\Select::make('share_method')
-                        ->label('Paylaşım Yöntemi')
-                        ->options([
-                            'email' => '📧 E-posta ile gönder',
-                            'whatsapp' => '📱 WhatsApp ile paylaş',
-                            'pdf' => '📄 PDF olarak indir',
-                            'link' => '🔗 Paylaşım linki oluştur'
-                        ])
-                        ->required()
-                        ->default('email')
-                        ->live(),
-                    \Filament\Forms\Components\TextInput::make('recipient')
-                        ->label('Alıcı')
-                        ->placeholder('E-posta adresi veya telefon numarası')
-                        ->required()
-                        ->visible(fn ($get) => in_array($get('share_method'), ['email', 'whatsapp'])),
-                    \Filament\Forms\Components\Textarea::make('message')
-                        ->label('Mesaj (Opsiyonel)')
-                        ->placeholder('Diyet programı ile birlikte göndermek istediğiniz mesaj...')
-                        ->rows(3),
-                ])
-                ->action(function (array $data) {
-                    $this->shareProgram($data);
-                }),
+                ->modalCancelActionLabel('İptal'),
+
 
             Action::make('back')
                 ->label('Geri Dön')
@@ -182,9 +158,6 @@ class DietProgramEditor extends Page
             case 'pdf':
                 $this->downloadAsPdf();
                 break;
-            case 'link':
-                $this->generateShareLink();
-                break;
         }
     }
 
@@ -234,20 +207,6 @@ class DietProgramEditor extends Page
             ->success()
             ->send();
     }
-
-    private function generateShareLink(): void
-    {
-        $shareLink = url("/diet-programs/{$this->dietProgram->id}/public");
-
-        $this->dispatch('copyToClipboard', ['text' => $shareLink]);
-
-        Notification::make()
-            ->title('Paylaşım linki kopyalandı!')
-            ->body('Link panoya kopyalandı. İstediğiniz yerde paylaşabilirsiniz.')
-            ->success()
-            ->send();
-    }
-
     public function loadTable(): void
     {
         $items = $this->dietProgram->items()
@@ -314,9 +273,5 @@ class DietProgramEditor extends Page
             ->whereHas('meals')
             ->orderBy('name')
             ->get();
-    }
-    public function openShareModal(): void
-    {
-        $this->dispatch('openShareModal');
     }
 }

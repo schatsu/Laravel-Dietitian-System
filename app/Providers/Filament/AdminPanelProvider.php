@@ -66,7 +66,11 @@ class AdminPanelProvider extends PanelProvider
                     ->editable(true)
                     ->timezone('Europe/Istanbul')
                     ->locale('tr')
-                    ->config([]),
+                    ->config([
+                        'initialView' => 'dayGridMonth',
+                        'eventDisplay' => 'block',
+                        'firstDay' => 1,
+                    ]),
                 FilamentShieldPlugin::make(),
             ])
             ->navigationGroups([

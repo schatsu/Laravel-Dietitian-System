@@ -15,13 +15,13 @@ enum ProgramDayEnum: string
     public function label(): string
     {
         return match($this) {
-            self::MONDAY => 'Pazartesi',
-            self::TUESDAY => 'Salı',
-            self::WEDNESDAY => 'Çarşamba',
-            self::THURSDAY => 'Perşembe',
-            self::FRIDAY => 'Cuma',
-            self::SATURDAY => 'Cumartesi',
-            self::SUNDAY => 'Pazar',
+            self::MONDAY => 'Pzt',
+            self::TUESDAY => 'Sal',
+            self::WEDNESDAY => 'Çar',
+            self::THURSDAY => 'Per',
+            self::FRIDAY => 'Cum',
+            self::SATURDAY => 'Cmt',
+            self::SUNDAY => 'Paz',
             default => 'Bilinmiyor',
         };
     }
