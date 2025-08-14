@@ -1,27 +1,27 @@
 <?php
 
-namespace App\Filament\Resources\AppointmentResource\Widgets;
+namespace App\Filament\Resources\ClientResource\Widgets;
 
-use App\Models\Appointment;
+use App\Models\Client;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Carbon;
 
-class AppointmentOverview extends BaseWidget
+class TotalClient extends BaseWidget
 {
     protected function getStats(): array
     {
-        $totalAppointments = Appointment::query()->count();
+        $totalClients = Client::query()->count();
 
         // Son 7 günün tarihleri
         $days = collect(range(6, 0))->map(fn($i) => Carbon::today()->subDays($i));
 
-        // Son 7 günün randevu sayıları
-        $chartData = $days->map(fn($day) => Appointment::query()->whereDate('created_at', $day)->count())->toArray();
+        // Son 7 günün yeni client sayıları
+        $chartData = $days->map(fn($day) => Client::query()->whereDate('created_at', $day)->count())->toArray();
 
         // Bugün ve dün arasındaki artış
-        $todayCount = Appointment::query()->whereDate('created_at', Carbon::today())->count();
-        $yesterdayCount = Appointment::query()->whereDate('created_at', Carbon::yesterday())->count();
+        $todayCount = Client::query()->whereDate('created_at', Carbon::today())->count();
+        $yesterdayCount = Client::query()->whereDate('created_at', Carbon::yesterday())->count();
 
         $increasePercent = $yesterdayCount > 0
             ? round((($todayCount - $yesterdayCount) / $yesterdayCount) * 100)
@@ -30,12 +30,11 @@ class AppointmentOverview extends BaseWidget
         $isPositive = $increasePercent >= 0;
 
         return [
-            Stat::make('Toplam Randevu', $totalAppointments)
+            Stat::make('Toplam Danışan', $totalClients)
                 ->description(($isPositive ? '+' : '') . $increasePercent . '% ' . ($isPositive ? 'artış' : 'azalış'))
                 ->descriptionIcon($isPositive ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->chart($chartData)
                 ->color($isPositive ? 'success' : 'danger'),
         ];
     }
-
 }

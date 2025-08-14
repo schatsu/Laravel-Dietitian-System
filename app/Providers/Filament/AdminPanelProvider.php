@@ -3,6 +3,8 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Resources\AppointmentResource\Widgets\AppointmentOverview;
+use App\Filament\Resources\AppointmentResource\Widgets\LastAppointments;
+use App\Filament\Resources\ClientResource\Widgets\TotalClient;
 use Filament\Http\Middleware\Authenticate;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -44,9 +46,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-//                Widgets\AccountWidget::class,
+                TotalClient::class,
                 AppointmentOverview::class,
-//                Widgets\FilamentInfoWidget::class,
+                LastAppointments::class,
             ])
             ->middleware([
                 EncryptCookies::class,
