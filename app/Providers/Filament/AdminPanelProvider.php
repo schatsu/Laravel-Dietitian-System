@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Resources\AppointmentResource\Widgets\AppointmentOverview;
 use App\Filament\Resources\AppointmentResource\Widgets\LastAppointments;
+use App\Filament\Resources\ClientPaymentResource\Widgets\ClientPaymentsChart;
 use App\Filament\Resources\ClientResource\Widgets\TotalClient;
 use Filament\Http\Middleware\Authenticate;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -49,6 +50,7 @@ class AdminPanelProvider extends PanelProvider
                 TotalClient::class,
                 AppointmentOverview::class,
                 LastAppointments::class,
+                ClientPaymentsChart::class,
             ])
             ->middleware([
                 EncryptCookies::class,
