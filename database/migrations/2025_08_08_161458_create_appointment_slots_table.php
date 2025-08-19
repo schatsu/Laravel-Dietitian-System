@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('appointment_slots', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('weekly_schedule_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('weekly_schedule_id')->nullable()->constrained()->cascadeOnDelete();
             $table->date('date');
             $table->time('start_time');
             $table->time('end_time');

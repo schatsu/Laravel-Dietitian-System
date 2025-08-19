@@ -8,8 +8,22 @@ use Filament\Widgets\ChartWidget;
 
 class AppointmentChart extends ChartWidget
 {
-    protected static ?string $heading = 'Randevular';
+    protected static ?string $heading = 'Aylık Randevu Sayısı';
 
+
+    public ?string $filter = 'this_year';
+
+    protected function getFilters(): ?array
+    {
+        $years = range(now()->year, now()->year - 2);
+        $filters = ['this_year' => 'Bu Yıl'];
+
+        foreach ($years as $year) {
+            $filters[(string) $year] = $year;
+        }
+
+        return $filters;
+    }
 
     protected function getData(): array
     {
@@ -19,26 +33,33 @@ class AppointmentChart extends ChartWidget
         $pending = [];
         $rejected = [];
 
+        $year = $this->filter === 'this_year' ? now()->year : (int) $this->filter;
+
         foreach (range(1, 12) as $month) {
             $approved[] = Appointment::query()
-                ->whereHas('slot', function ($q) use ($month) {
-                    $q->whereMonth('date', $month);
-                })->where('status', AppointmentStatusEnum::APPROVED)
+                ->whereHas('slot', function ($q) use ($month, $year) {
+                    $q->whereMonth('date', $month)
+                        ->whereYear('date', $year);
+                })
+                ->where('status', AppointmentStatusEnum::APPROVED)
                 ->count();
 
             $pending[] = Appointment::query()
-                ->whereHas('slot', function ($q) use ($month) {
-                    $q->whereMonth('date', $month);
-                })->where('status', AppointmentStatusEnum::PENDING)
+                ->whereHas('slot', function ($q) use ($month, $year) {
+                    $q->whereMonth('date', $month)
+                        ->whereYear('date', $year);
+                })
+                ->where('status', AppointmentStatusEnum::PENDING)
                 ->count();
 
             $rejected[] = Appointment::query()
-                ->whereHas('slot', function ($q) use ($month) {
-                    $q->whereMonth('date', $month);
-                })->where('status', AppointmentStatusEnum::REJECTED)
+                ->whereHas('slot', function ($q) use ($month, $year) {
+                    $q->whereMonth('date', $month)
+                        ->whereYear('date', $year);
+                })
+                ->where('status', AppointmentStatusEnum::REJECTED)
                 ->count();
         }
-
 
         return [
             'labels' => $months,
@@ -69,12 +90,11 @@ class AppointmentChart extends ChartWidget
                 ],
             ],
         ];
-
     }
 
     protected function getType(): string
     {
-        return 'bar';
+        return 'line';
     }
     protected function getOptions(): array
     {
