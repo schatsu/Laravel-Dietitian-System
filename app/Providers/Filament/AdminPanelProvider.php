@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Dashboard;
 use App\Filament\Resources\AppointmentResource\Widgets\AppointmentOverview;
 use App\Filament\Resources\AppointmentResource\Widgets\LastAppointments;
 use App\Filament\Resources\ClientPaymentResource\Widgets\ClientPaymentsChart;
@@ -43,14 +44,15 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+//                Pages\Dashboard::class,
+                Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                TotalClient::class,
-                AppointmentOverview::class,
-                LastAppointments::class,
-                ClientPaymentsChart::class,
+//                TotalClient::class,
+//                AppointmentOverview::class,
+//                LastAppointments::class,
+//                ClientPaymentsChart::class,
             ])
             ->middleware([
                 EncryptCookies::class,

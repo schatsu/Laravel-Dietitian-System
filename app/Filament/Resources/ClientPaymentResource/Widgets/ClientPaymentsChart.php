@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 
 class ClientPaymentsChart extends ChartWidget
 {
+
     protected static ?string $heading = 'Danışan Ödemeleri';
     protected static string $color = 'success';
 
