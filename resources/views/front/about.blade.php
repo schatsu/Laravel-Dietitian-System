@@ -1,14 +1,29 @@
 @extends('front.layouts.base')
+@push('css')
+    <style>
+        .about-content ul li {
+            list-style-type: disc !important;
+        }
+    </style>
+@endpush
 @section('content')
     <!-- start section -->
     <section id="down-section" class="border-bottom border-color-extra-medium-gray mt-2">
         <div class="container overlap-gap-section">
-            <div class="row align-items-end justify-content-center mb-5 md-mb-40px text-center text-md-start">
-                <div class=" col-md-10 md-mb-20px text-center text-lg-start" data-anime='{ "el": "childs", "translateY": [30, 0], "opacity": [0,1], "duration": 600, "delay": 0, "staggervalue": 300, "easing": "easeOutQuad" }'>
-                    <h3 class="text-dark-gray fw-700 mb-0 ls-minus-1px">Hakkımda</h3>
+            <div class="row justify-content-center mb-3">
+                <div class="col-lg-12 text-center appear anime-child anime-complete" data-anime="{ &quot;el&quot;: &quot;childs&quot;, &quot;translateY&quot;: [30, 0], &quot;opacity&quot;: [0,1], &quot;duration&quot;: 600, &quot;delay&quot;: 0, &quot;staggervalue&quot;: 300, &quot;easing&quot;: &quot;easeOutQuad&quot; }">
+                    <h2 class="text-dark-gray ls-minus-1px">Hakkımda</h2>
+                    <div class="mt-auto justify-content-start breadcrumb breadcrumb-style-01 fs-14 text-dark-gray">
+                        <ul>
+                            <li><a href="{{route('home')}}" class="text-dark-gray text-dark-gray-hover">Ana sayfa</a></li>
+                            <li><a href="{{route('about')}}" class="text-dark-gray fw-bold text-dark-gray-hover">Hakkımda</a></li>
+                        </ul>
+                    </div>
                 </div>
-                <div class=" col-md-10 md-mb-20px text-center text-lg-start last-paragraph-no-margin">
-                    <p class="w-90 xl-w-100" data-anime='{ "el": "lines", "translateY": [30, 0], "opacity": [0,1], "duration": 600, "delay": 0, "staggervalue": 300, "easing": "easeOutQuad" }'>{!! $about?->content !!}<span class="fw-600 text-dark-gray text-decoration-line-bottom"></span></p>
+            </div>
+            <div class="row align-items-center justify-content-center mb-5 md-mb-40px text-center text-md-start">
+                <div class="about-content col-md-10 md-mb-20px text-center text-lg-start last-paragraph-no-margin">
+                    <p class="w-90 xl-w-100" data-anime='{ "el": "lines", "translateY": [30, 0], "opacity": [0,1], "duration": 600, "delay": 0, "staggervalue": 300, "easing": "easeOutQuad" }'>{!! str($about->content)->sanitizeHtml() !!}<span class="fw-600 text-dark-gray text-decoration-line-bottom"></span></p>
                 </div>
             </div>
             <div class="row row-cols-1 row-cols-lg-4 row-cols-md-2 row-cols-sm-2 justify-content-center" data-anime='{ "el": "childs", "translateY": [30, 0], "opacity": [0,1], "duration": 600, "delay": 0, "staggervalue": 150, "easing": "easeOutQuad" }'>

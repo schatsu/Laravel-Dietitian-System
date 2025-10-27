@@ -5,10 +5,8 @@ namespace App\Filament\Resources;
 use App\Enums\AppointmentStatusEnum;
 use App\Filament\Resources\AppointmentResource\Pages;
 use App\Filament\Resources\AppointmentResource\RelationManagers;
-use App\Filament\Resources\AppointmentResource\Widgets\CalendarWidget;
 use App\Models\Appointment;
 use App\Models\AppointmentSlot;
-use Filament\Forms;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -19,8 +17,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+
 
 class AppointmentResource extends Resource
 {

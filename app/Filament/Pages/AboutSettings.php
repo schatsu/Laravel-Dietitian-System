@@ -64,6 +64,23 @@ class AboutSettings extends Page implements HasForms
                     RichEditor::make('content')
                         ->label('İçerik')
                         ->required()
+                        ->toolbarButtons([
+                            'attachFiles',
+                            'blockquote',
+                            'bold',
+                            'bulletList',
+                            'codeBlock',
+                            'h1',
+                            'h2',
+                            'h3',
+                            'italic',
+                            'link',
+                            'orderedList',
+                            'redo',
+                            'strike',
+                            'underline',
+                            'undo',
+                        ])
                         ->columnSpanFull(),
                 ])
             ])

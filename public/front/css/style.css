@@ -201,33 +201,34 @@ video {
 ====================================== */
 /* Heading */
 .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
-  margin-bottom: 30px;
-  letter-spacing: -0.5px;
-  font-weight: inherit;
+    margin-bottom: 20px; /* biraz daha küçük boşluk */
+    letter-spacing: normal; /* -0.5px fazla agresif, normal bırak */
+    font-weight: 600; /* genelde başlıklar için 600 idealdir */
 }
+
 h1, .h1 {
-  font-size: 4.375rem;
-  line-height: 4.375rem;
+    font-size: 2.5rem; /* yaklaşık 40px */
+    line-height: 1.2;
 }
 h2, .h2 {
-  font-size: 3.438rem;
-  line-height: 3.438rem;
+    font-size: 2rem; /* yaklaşık 32px */
+    line-height: 1.3;
 }
 h3, .h3 {
-  font-size: 2.813rem;
-  line-height: 3.125rem;
+    font-size: 1.75rem; /* yaklaşık 28px */
+    line-height: 1.35;
 }
 h4 {
-  font-size: 2.375rem;
-  line-height: 2.7rem;
+    font-size: 1.5rem; /* yaklaşık 24px */
+    line-height: 1.4;
 }
 h5 {
-  font-size: 2rem;
-  line-height: 2.2rem;
+    font-size: 1.25rem; /* yaklaşık 20px */
+    line-height: 1.4;
 }
 h6 {
-  font-size: 1.75rem;
-  line-height: 1.95rem;
+    font-size: 1rem; /* yaklaşık 16px */
+    line-height: 1.5;
 }
 /* Font custom */
 .font-style-italic {
