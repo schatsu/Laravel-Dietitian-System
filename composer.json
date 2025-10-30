@@ -21,6 +21,7 @@
         "maatwebsite/excel": "^3.1",
         "mtvs/eloquent-hashids": "^3.6",
         "predis/predis": "^3.2",
+        "realrashid/sweet-alert": "^7.3",
         "saade/filament-fullcalendar": "^3.0",
         "spatie/eloquent-sortable": "^4.5",
         "spatie/laravel-sluggable": "^3.7"

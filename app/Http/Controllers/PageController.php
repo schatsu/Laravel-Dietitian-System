@@ -15,4 +15,9 @@ class PageController extends Controller
 
         return view('front.about', compact('about'));
     }
+
+    public function contact()
+    {
+        return view('front.contact');
+    }
 }

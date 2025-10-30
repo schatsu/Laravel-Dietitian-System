@@ -13,15 +13,16 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
+use Spatie\Tags\HasTags;
 
 #[ObservedBy(ServiceObserver::class)]
 class Service extends Model implements HasMedia
 {
-    use HasSlug, InteractsWithMedia;
+    use HasSlug, InteractsWithMedia, HasTags;
 
     protected $fillable = [
-        'name', 'slug', 'status', 'description', 'order',
-        'image', 'seo_title', 'seo_description', 'seo_keywords',
+        'name', 'slug', 'status', 'description', 'content',
+        'order', 'image', 'seo_title', 'seo_description',
     ];
 
     /**

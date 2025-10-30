@@ -14,11 +14,12 @@ class ServiceController extends Controller
             return Service::query()
                 ->select([
                     'id','name', 'slug', 'status', 'description', 'order',
-                    'image', 'seo_title', 'seo_description', 'seo_keywords',
+                    'image', 'seo_title', 'seo_description', 'content',
                 ])
                 ->where('status', true)
+                ->with('media')
                 ->orderBy('order')
-                ->get();
+                ->paginate(12);
 
         }) ?? collect();
 

@@ -13,7 +13,7 @@ class HeaderViewComposer
             return \App\Models\Service::query()
                 ->select([
                     'id','name', 'slug', 'status', 'description', 'order',
-                    'image', 'seo_title', 'seo_description', 'seo_keywords',
+                    'image', 'seo_title', 'seo_description',
                 ])
                 ->where('status', true)
                 ->orderBy('order')

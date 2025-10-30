@@ -17,11 +17,11 @@ return new class extends Migration
             $table->string('slug')->unique()->nullable()->index();
             $table->string('status')->default(false)->nullable()->index();
             $table->text('description')->nullable()->index();
+            $table->longText('content')->nullable();
             $table->integer('order')->nullable()->index();
             $table->string('image')->nullable()->index();
             $table->text('seo_title')->nullable()->index();
             $table->text('seo_description')->nullable()->index();
-            $table->text('seo_keywords')->nullable()->index();
             $table->timestamps();
         });
     }

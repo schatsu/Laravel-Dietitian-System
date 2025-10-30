@@ -1,4 +1,5 @@
 @extends('front.layouts.base')
+@section('page-title', 'Ana sayfa')
 @section('content')
     <!-- start slider -->
     <x-slider/>
@@ -90,7 +91,7 @@
                 <div class="col-12 text-center align-items-center" data-anime='{ "translateY": [30, 0], "opacity": [0,1], "duration": 600, "delay": 0, "staggervalue": 300, "easing": "easeOutQuad" }'>
                     <div class="bg-base-color fw-700 text-white text-uppercase border-radius-30px ps-20px pe-20px fs-12 me-10px sm-m-5px d-inline-block align-middle">Hadi Başlayalım</div>
                     <div class="fs-18 fw-500 text-dark-gray d-inline-block align-middle">
-                        Sağlıklı yaşam yolculuğunuza bugün başlayın. <a href="iletisim.html" class="text-dark-gray text-decoration-line-bottom fw-700">İletişime geçin</a>
+                        Sağlıklı yaşam yolculuğunuza bugün başlayın. <a href="{{route('contact')}}" class="text-dark-gray text-decoration-line-bottom fw-700">İletişime geçin</a>
                     </div>
                 </div>
             </div>
@@ -103,5 +104,5 @@
 @endsection
 @push('script')
     <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA-VubYuwDoHyMIyqcG8i5plpA8z-uTwqo&callback=initMap"></script>
+                src="https://maps.googleapis.com/maps/api/js?key={{config('services.google.maps_api_key')}}&callback=initMap"></script>
 @endpush

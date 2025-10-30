@@ -31,56 +31,94 @@ class ServiceResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Genel Bilgiler')
+                Forms\Components\Wizard::make()
                     ->schema([
-                        Forms\Components\Grid::make()
+                        Forms\Components\Wizard\Step::make('Genel Bilgiler')
                             ->schema([
-                                Forms\Components\TextInput::make('name')
-                                    ->label('Hizmet Adı')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->live(onBlur: true)
-                                    ->afterStateUpdated(function (string $operation, $state, callable $set) {
-                                        $set("slug", Str::slug($state));
-                                    }),
-                                Forms\Components\TextInput::make('slug')
-                                    ->label('Slug')
-                                    ->unique(ignoreRecord: true)
-                                    ->required()
-                                    ->maxLength(255),
-                                Forms\Components\Toggle::make('status')
-                                    ->label('Yayında mı?')
-                                    ->default(false),
+                                Forms\Components\Grid::make()
+                                    ->schema([
+                                        Forms\Components\TextInput::make('name')
+                                            ->label('Hizmet Adı')
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->live(onBlur: true)
+                                            ->afterStateUpdated(function (string $operation, $state, callable $set) {
+                                                $set('slug', Str::slug($state));
+                                            }),
+
+                                        Forms\Components\TextInput::make('slug')
+                                            ->label('Slug')
+                                            ->unique(ignoreRecord: true)
+                                            ->required()
+                                            ->maxLength(255),
+
+                                        Forms\Components\Toggle::make('status')
+                                            ->label('Yayında mı?')
+                                            ->default(false),
+
+                                        Forms\Components\TextInput::make('order')
+                                            ->label('Sıra')
+                                            ->numeric()
+                                            ->minValue(1),
+                                    ]),
+                            ]),
+
+                        Forms\Components\Wizard\Step::make('İçerik')
+                            ->schema([
                                 Forms\Components\Textarea::make('description')
-                                    ->label('Açıklama')
+                                    ->label('Kısa Açıklama')
                                     ->columnSpanFull(),
+
+                                Forms\Components\RichEditor::make('content')
+                                    ->label('Detaylı İçerik')
+                                    ->toolbarButtons([
+                                        'bold',
+                                        'italic',
+                                        'underline',
+                                        'strike',
+                                        'link',
+                                        'orderedList',
+                                        'bulletList',
+                                        'blockquote',
+                                        'codeBlock',
+                                        'h2',
+                                        'h3',
+                                        'alignLeft',
+                                        'alignCenter',
+                                        'alignRight',
+                                        'undo',
+                                        'redo',
+                                    ])
+                                    ->columnSpanFull(),
+
                                 SpatieMediaLibraryFileUpload::make('images')
                                     ->imageEditor()
                                     ->collection('images')
                                     ->directory('services')
                                     ->label('Görsel')
                                     ->image(),
-                                Forms\Components\TextInput::make('order')
-                                    ->label('Sıra')
-                                    ->numeric()
-                                    ->minValue(1),
-                            ])
-                    ])->collapsible(),
+                            ]),
 
-                Forms\Components\Section::make('SEO Ayarları')
-                    ->schema([
-                        Forms\Components\TextInput::make('seo_title')
-                            ->label('SEO Başlık')
-                            ->maxLength(255),
-                        Forms\Components\Textarea::make('seo_description')
-                            ->label('SEO Açıklaması')
-                            ->columnSpanFull(),
-                        Forms\Components\TextInput::make('seo_keywords')
-                            ->label('SEO Anahtar Kelimeler')
-                            ->maxLength(255),
-                    ])->collapsed(),
+                        Forms\Components\Wizard\Step::make('SEO Ayarları')
+                            ->schema([
+                                Forms\Components\TextInput::make('seo_title')
+                                    ->label('SEO Başlık')
+                                    ->maxLength(255),
+
+                                Forms\Components\Textarea::make('seo_description')
+                                    ->label('SEO Açıklaması')
+                                    ->columnSpanFull(),
+
+                                Forms\Components\SpatieTagsInput::make('seo_keywords')
+                                    ->type('service_seo_keywords')
+                                    ->label('SEO Anahtar Kelimeleri'),
+                            ]),
+                    ])
+                    ->columnSpanFull()
+                    ->skippable(),
             ]);
     }
+
 
     public static function table(Table $table): Table
     {

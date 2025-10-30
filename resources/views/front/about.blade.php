@@ -1,4 +1,5 @@
 @extends('front.layouts.base')
+@section('page-title', 'Hakkımda')
 @push('css')
     <style>
         .about-content ul li {
@@ -16,7 +17,7 @@
                     <div class="mt-auto justify-content-start breadcrumb breadcrumb-style-01 fs-14 text-dark-gray">
                         <ul>
                             <li><a href="{{route('home')}}"
-                                   class="text-dark-gray text-dark-gray-hover">Anasayfa</a></li>
+                                   class="text-dark-gray text-dark-gray-hover">Ana sayfa</a></li>
                             <li><a href="{{route('about')}}"
                                    class="text-dark-gray fw-bold text-dark-gray-hover">Hakkımda</a></li>
                         </ul>
@@ -28,22 +29,23 @@
                     {!! str($about?->content ?? '')->sanitizeHtml() !!}
                 </div>
             </div>
-            <div class="row row-cols-1 row-cols-lg-4 row-cols-md-2 row-cols-sm-2 justify-content-center" data-anime='{ "el": "childs", "translateY": [30, 0], "opacity": [0,1], "duration": 600, "delay": 0, "staggervalue": 150, "easing": "easeOutQuad" }'>
-                <!-- start features box item -->
-                @foreach($about?->highlights as $stat)
-                    <div class="col custom-icon-with-text-style-02">
-                        <div class="feature-box p-6 last-paragraph-no-margin overflow-hidden md-mb-20px">
-                            <x-dynamic-component :component="$stat['icon'] ?? null" style="width: 50px; height: 50px; color: #C4C1E9"/>
-                            <div class="feature-box-content">
-                                <span class="d-block fs-19 fw-700 text-dark-gray mb-5px">{{$stat['title'] ?? ''}}</span>
-                                <p>{{$stat['subtitle'] ?? ''}}</p>
+            @if($about?->highlights)
+                <div class="row row-cols-1 row-cols-lg-4 row-cols-md-2 row-cols-sm-2 justify-content-center" data-anime='{ "el": "childs", "translateY": [30, 0], "opacity": [0,1], "duration": 600, "delay": 0, "staggervalue": 150, "easing": "easeOutQuad" }'>
+                    <!-- start features box item -->
+                    @foreach($about?->highlights as $stat)
+                        <div class="col custom-icon-with-text-style-02">
+                            <div class="feature-box p-6 last-paragraph-no-margin overflow-hidden md-mb-20px">
+                                <x-dynamic-component :component="$stat['icon'] ?? null" style="width: 50px; height: 50px; color: #C4C1E9"/>
+                                <div class="feature-box-content">
+                                    <span class="d-block fs-19 fw-700 text-dark-gray mb-5px">{{$stat['title'] ?? ''}}</span>
+                                    <p>{{$stat['subtitle'] ?? ''}}</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                @endforeach
-                <!-- end features box item -->
-            </div>
-
+                    @endforeach
+                    <!-- end features box item -->
+                </div>
+            @endif
         </div>
     </section>
     <section class="py-0 mb-20px sm-pt-50px appear anime-complete" data-anime="{ &quot;translateY&quot;: [0, 0], &quot;opacity&quot;: [0,1], &quot;duration&quot;: 1200, &quot;delay&quot;: 0, &quot;staggervalue&quot;: 150, &quot;easing&quot;: &quot;easeOutQuad&quot; }" style="">
@@ -64,7 +66,6 @@
     </section>
     <x-service/>
     <x-review/>
-    <x-featured-blog/>
 @endsection
 @push('script')
     <script>

@@ -23,8 +23,12 @@ class ManageSocialSettings extends SettingsPage
             ->schema([
                 Forms\Components\Section::make('Sosyal Medya Ayarları')
                     ->schema([
-                        Forms\Components\Grid::make(3)
+                        Forms\Components\Grid::make()
                             ->schema([
+                                Forms\Components\TextInput::make('instagram')
+                                    ->label('Instagram URL')
+                                    ->url()
+                                    ->nullable(),
                                 Forms\Components\TextInput::make('facebook')
                                     ->label('Facebook URL')
                                     ->url()
@@ -33,20 +37,27 @@ class ManageSocialSettings extends SettingsPage
                                     ->label('X URL')
                                     ->url()
                                     ->nullable(),
-                                Forms\Components\TextInput::make('instagram')
-                                    ->label('Instagram URL')
-                                    ->url()
-                                    ->nullable(),
                                 Forms\Components\TextInput::make('linkedin')
                                     ->label('LinkedIn URL')
                                     ->url()
                                     ->nullable(),
-                                Forms\Components\TextInput::make('youtube')
-                                    ->label('YouTube URL')
+                                Forms\Components\TextInput::make('g_plus')
+                                    ->label('Google+ URL')
                                     ->url()
                                     ->nullable(),
+                                Forms\Components\TextInput::make('youtube')
+                                    ->label('Youtube URL')
+                                    ->url()
+                                    ->nullable(),
+                                Forms\Components\TextInput::make('vimeo')
+                                    ->label('Vimeo URL')
+                                    ->url()
+                                    ->nullable(),
+                                Forms\Components\TextInput::make('email')
+                                    ->label('E-Posta Adresi')
+                                    ->nullable(),
                             ])
-                    ])
+                    ])->collapsible()
             ]);
     }
 }

@@ -1,6 +1,6 @@
 @extends('front.layouts.base')
 @section('page-title', $blog?->name ?? '')
-@push('styles')
+@push('css')
     <style>
         .attachment__caption {
             display: none !important;
@@ -21,7 +21,7 @@
                     <h2 class="text-dark-gray ls-minus-1px mb-4">{{$blog?->title ?? ''}}</h2>
                     <div class="mt-auto justify-content-start breadcrumb breadcrumb-style-01 fs-14 text-dark-gray">
                         <ul>
-                            <li><a href="{{route('home')}}" class="text-dark-gray text-dark-gray-hover">Anasayfa</a></li>
+                            <li><a href="{{route('home')}}" class="text-dark-gray text-dark-gray-hover">Ana sayfa</a></li>
                             <li><a href="{{route('blogs.index')}}" class="text-dark-gray text-dark-gray-hover">Blog</a></li>
                             <li><a href="{{route('blogs.show', ['blog' => $blog?->slug])}}" class="text-dark-gray fw-bold text-dark-gray-hover">{{$blog?->title ?? ''}}</a></li>
                         </ul>
@@ -50,7 +50,7 @@
     </section>
     <!-- end section -->
 @endsection
-@push('scripts')
+@push('script')
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll("a[href*='storage']").forEach(el => {

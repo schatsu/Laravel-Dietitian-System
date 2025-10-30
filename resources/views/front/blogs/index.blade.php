@@ -38,7 +38,7 @@
                     <div class="mt-auto justify-content-start breadcrumb breadcrumb-style-01 fs-14 text-dark-gray">
                         <ul>
                             <li><a href="{{route('home')}}"
-                                   class="text-dark-gray text-dark-gray-hover">Anasayfa</a></li>
+                                   class="text-dark-gray text-dark-gray-hover">Ana sayfa</a></li>
                             <li><a href="{{route('blogs.index')}}"
                                    class="text-dark-gray fw-bold text-dark-gray-hover">Blog</a></li>
                         </ul>

@@ -22,10 +22,12 @@ class Service extends Component
             return \App\Models\Service::query()
                 ->select([
                     'id','name', 'slug', 'status', 'description', 'order',
-                    'image', 'seo_title', 'seo_description', 'seo_keywords',
+                    'image', 'seo_title', 'seo_description', 'content',
                 ])
                 ->where('status', true)
                 ->orderBy('order')
+                ->with('media')
+                ->limit(4)
                 ->get();
 
         }) ?? collect();

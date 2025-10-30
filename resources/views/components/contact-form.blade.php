@@ -5,7 +5,7 @@
              data-anime='{ "el": "childs", "translateX": [-50, 0], "opacity": [0,1], "duration": 800, "delay": 300, "staggervalue": 150, "easing": "easeOutQuad" }'>
             <div class="col-lg-8">
                 <div id="map" class="map h-100 md-h-450px"
-                     data-map-options='{ "lat": 5, "lng": 4, "style": "standart", "marker": { "type": "HTML", "color": "#005153" }, "popup": { "defaultOpen": true, "html": "<div class=infowindow><strong class=\"mb-3 d-inline-block alt-font\">Dr.Emel Gökmen</strong><p class=\"alt-font\">adres</p></div><div class=\"google-maps-link alt-font\"> <a aria-label=\"{{__('messages.view_larger_map')}}\" target=\"_blank\" jstcache=\"31\" href=\"https://maps.app.goo.gl/yacc3SwtUE1yX7VR9\" jsaction=\"mouseup:placeCard.largerMap\">{{__('messages.view_larger_map')}}</a></div>" } }'></div>
+                     data-map-options='{ "lat": {{$generalSetting?->latitude ?: ''}}, "lng": {{$generalSetting?->longitude ?: ''}}, "style": "standart", "marker": { "type": "HTML", "color": "#005153" }, "popup": { "defaultOpen": true, "html": "<div class=infowindow><strong class=\"mb-3 d-inline-block alt-font\">{{$generalSetting?->site_name}}</strong><p class=\"alt-font\">{{$generalSetting?->address ?: ''}}</p></div><div class=\"google-maps-link alt-font\"> <a aria-label=\"Daha büyük haritayı görüntüle\" target=\"_blank\" jstcache=\"31\" href=\"https://maps.app.goo.gl/dS1yiJACJh8sHGBm9\" jsaction=\"mouseup:placeCard.largerMap\">Daha büyük haritayı görüntüle</a></div>" } }'></div>
             </div>
             <div class="col-xxl-4 col-lg-6 position-relative">
                 <div
@@ -40,10 +40,11 @@
                                 class="btn btn-medium btn-base-color btn-round-edge btn-box-shadow mb-20px mt-25px submit w-100"
                                 type="submit">Mesaj Gönder<i class="fa-regular fa-envelope"></i>
                             </button>
-                            {{--                                <p class="fs-13 lh-22 w-90 md-w-100">I understand that my data will be hold securely in--}}
-                            {{--                                    accordance with the <a--}}
-                            {{--                                        class="text-decoration-line-bottom text-dark-gray text-dark-gray-hover fw-500"--}}
-                            {{--                                        href="#">privacy policy.</a></p>--}}
+{{--                              <p class="fs-13 lh-22 w-90 md-w-100">I understand that my data will be hold securely in--}}
+{{--                                  accordance with the <a--}}
+{{--                                      class="text-decoration-line-bottom text-dark-gray text-dark-gray-hover fw-500"--}}
+{{--                                      href="#">privacy policy.</a>--}}
+{{--                              </p>--}}
                         </div>
                     </form>
                 </div>

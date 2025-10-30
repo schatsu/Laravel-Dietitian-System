@@ -35,14 +35,14 @@
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                                 @forelse($headerServices as $service)
                                     <li>
-                                        <a href="{{route('services.show', ['slug' => $service?->slug])}}">{{$service?->name ?? ''}}</a>
+                                        <a href="{{route('services.show', ['service' => $service?->slug])}}">{{$service?->name ?? ''}}</a>
                                     </li>
                                 @empty
                                 @endforelse
                             </ul>
                         </li>
                         <li class="nav-item"><a href="{{route('blogs.index')}}" class="nav-link">Blog</a></li>
-                        <li class="nav-item"><a href="demo-corporate-contact.html" class="nav-link">İletişim</a></li>
+                        <li class="nav-item"><a href="{{route('contact')}}" class="nav-link">İletişim</a></li>
                     </ul>
                 </div>
             </div>
@@ -67,6 +67,17 @@
                             </form>
                         </div>
                     </div>
+                    <div style="padding-left: 15px !important;" class="header-button">
+                        <a href="{{route('appointments.index')}}"
+                           class="btn btn-very-small btn-switch-text btn-base-color left-icon btn-round-edge btn-box-shadow">
+                              <span>
+                                 <span><i class="feather icon-feather-calendar"></i></span>
+                                 <span class="btn-double-text"
+                                       data-text="Acele et!">Randevu Al</span>
+                              </span>
+                        </a>
+                    </div>
+
                 </div>
             </div>
         </div>
