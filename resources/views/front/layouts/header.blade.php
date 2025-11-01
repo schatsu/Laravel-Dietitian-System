@@ -55,11 +55,11 @@
                         <div class="search-form-wrapper">
                             <button title="Close" type="button" class="search-close alt-font">×</button>
                             <form id="search-form" role="search" method="get" class="search-form text-left"
-                                  action="search-result.html">
+                                  action="#">
                                 <div class="search-form-box">
-                                    <h2 class="text-dark-gray text-center mb-7 fw-600">What are you looking for?</h2>
+                                    <h2 class="text-dark-gray text-center mb-7 fw-600">Ne arıyorsunuz?</h2>
                                     <input class="search-input alt-font" id="search-form-input5e219ef164995"
-                                           placeholder="Enter your keywords..." name="s" value="" type="text"
+                                           placeholder="Anahtar kelimelerinizi giriniz..." name="s" value="" type="text"
                                            autocomplete="off">
                                     <button type="submit" class="search-button">
                                         <i class="feather icon-feather-search" aria-hidden="true"></i>
