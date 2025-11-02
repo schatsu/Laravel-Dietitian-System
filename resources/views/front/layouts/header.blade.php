@@ -27,16 +27,6 @@
                 </button>
                 <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
                     <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a href="{{route('appointments.index')}}"
-                               class="btn btn-very-small btn-switch-text btn-light left-icon btn-round-edge btn-box-shadow">
-                              <span>
-                                 <span><i class="feather icon-feather-calendar"></i></span>
-                                 <span class="btn-double-text"
-                                       data-text="Acele et!">Randevu Al</span>
-                              </span>
-                            </a>
-                        </li>
                         <li class="nav-item"><a href="{{route('home')}}" class="nav-link">Ana Sayfa</a></li>
                         <li class="nav-item"><a href="{{route('about')}}" class="nav-link">Hakkımda</a></li>
                         <li class="nav-item dropdown dropdown-with-icon-style02">
