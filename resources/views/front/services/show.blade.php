@@ -40,7 +40,7 @@
                             <i class="bi bi-chat-text icon-extra-medium text-base-color"></i>
                         </div>
                         <div class="feature-box-content last-paragraph-no-margin text-dark-gray text-uppercase fs-15 fw-700 ls-05px">
-                            Gelin birlikte harika bir iş çıkaralım. <a href="demo-corporate-contact.html" class="text-base-color text-decoration-line-bottom-medium border-1">Randevu Al</a>
+                            Gelin birlikte harika bir iş çıkaralım. <a href="{{route('appointments.index')}}" class="text-base-color text-decoration-line-bottom-medium border-1">Randevu Al</a>
                         </div>
                     </div>
                 </div>

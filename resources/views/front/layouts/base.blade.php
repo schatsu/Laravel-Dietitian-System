@@ -8,6 +8,7 @@
     <meta name="author" content="tufiworks">
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <meta name="description" content="tufiworks">
+    <meta name="robots" content="noindex, nofollow">
     <!-- favicon icon -->
     <link rel="shortcut icon" href="{{asset('front/images/favicon.png')}}">
     <link rel="apple-touch-icon" href="{{asset('front/images/apple-touch-icon-57x57.png')}}">
@@ -27,6 +28,7 @@
     <link rel="stylesheet" href="{{asset('front/css/responsive.css')}}"/>
     <link rel="stylesheet" href="{{asset('front/sass/icon/icon.scss')}}"/>
     <link rel="stylesheet" href="{{asset('front/corporate/corporate.css')}}" />
+
 
     <link rel="stylesheet" href="https://cdn.lineicons.com/5.0/lineicons.css" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">

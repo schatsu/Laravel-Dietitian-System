@@ -47,7 +47,7 @@
                     </ul>
                 </div>
             </div>
-            <div class="col-auto">
+            <div class="col-auto d-none d-lg-flex">
                 <div class="header-icon">
                     <div class="header-search-icon icon">
                         <a href="javascript:void(0)" class="search-form-icon header-search-form"><i
@@ -68,7 +68,7 @@
                             </form>
                         </div>
                     </div>
-                    <div style="padding-left: 15px !important;" class="header-button">
+                    <div class="header-button">
                         <a href="{{route('appointments.index')}}"
                            class="btn btn-very-small btn-switch-text btn-base-color left-icon btn-round-edge btn-box-shadow">
                               <span>
