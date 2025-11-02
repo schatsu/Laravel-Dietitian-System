@@ -19,7 +19,7 @@
                                         data-fancy-text='{ "effect": "rotate", "string": ["{{$slider?->title ?? ''}}"] }'></span>
                                     <div
                                         data-anime='{ "el": "childs", "translateY": [80, 0], "opacity": [0,1], "duration": 600, "delay": 1000, "staggervalue": 300, "easing": "easeOutQuad" }'>
-                                        <a href="#"
+                                        <a href="{{route('appointments.index')}}"
                                            @safeBlank class="btn btn-large btn-transparent-white-light border-1 btn-hover-animation btn-box-shadow btn-round-edge xs-m-10px">
                                                 <span>
                                                     <span class="btn-text">Randevu Al <i
