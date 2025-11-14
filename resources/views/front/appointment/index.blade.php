@@ -14,16 +14,19 @@
             font-size: 14px;
             transition: all 0.2s ease-in-out;
         }
+
         .badge-slot:hover {
             background-color: var(--base-color);;
             color: white;
         }
+
         .badge-slot.active {
             background-color: var(--base-color);;
             color: white;
             border-color: var(--base-color);;
             font-weight: 600;
         }
+
         #available-slots {
             display: flex;
             flex-wrap: wrap;
@@ -151,22 +154,25 @@
 
             flatpickr("#appointment-date", {
                 dateFormat: "Y-m-d",
-                minDate: "today",
+                minDate: "{{today()}}",
                 locale: {
+                    firstDayOfWeek: 1,
                     weekdays: {
-                        shorthand: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
-                        longhand: ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'],
+                        shorthand: ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'],
+                        longhand: ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'],
                     },
                     months: {
                         shorthand: ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'],
                         longhand: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
                     },
-                    ordinal: function() { return "."; },
+                    ordinal: function () {
+                        return ".";
+                    },
                     rangeSeparator: " – ",
                     weekAbbreviation: "Hf",
                     scrollTitle: "Kaydırarak değiştir",
                     toggleTitle: "Tıklayarak değiştir",
-                    amPM: ["ÖÖ","ÖS"]
+                    amPM: ["ÖÖ", "ÖS"]
                 },
                 onChange: function (selectedDates, dateStr) {
                     if (!dateStr) return;
@@ -179,7 +185,7 @@
 
                     slotSection.classList.remove('d-none');
 
-                    axios.get(`{{route('appointment-slots.by-date')}}`, { params: { date: dateStr } })
+                    axios.get(`{{route('appointment-slots.by-date')}}`, {params: {date: dateStr}})
                         .then(response => {
                             const slots = response.data;
 
@@ -189,8 +195,8 @@
                             }
 
                             slots.forEach(slot => {
-                                const start = slot.start_time.substring(0,5);
-                                const end = slot.end_time.substring(0,5);
+                                const start = slot.start_time.substring(0, 5);
+                                const end = slot.end_time.substring(0, 5);
 
                                 const badge = document.createElement('span');
                                 badge.className = 'badge-slot';
