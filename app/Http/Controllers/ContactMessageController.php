@@ -20,7 +20,11 @@ class ContactMessageController extends Controller
 
         SendContactMessageToAdminJob::dispatch($message);
 
-        toast('Mesaj Gönderildi.', 'success');
+        alert(
+            'Başarılı',
+            'Mesaj başarıyla gönderildi.',
+            'success'
+        );
 
         return redirect()->back();
     }

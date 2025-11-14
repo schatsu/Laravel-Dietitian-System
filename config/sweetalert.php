@@ -172,8 +172,8 @@ return [
     */
 
     'button_text' => [
-        'confirm' => env('SWEET_ALERT_CONFIRM_BUTTON_TEXT', 'OK'),
-        'cancel' => env('SWEET_ALERT_CANCEL_BUTTON_TEXT', 'Cancel'),
+        'confirm' => env('SWEET_ALERT_CONFIRM_BUTTON_TEXT', 'Tamam'),
+        'cancel' => env('SWEET_ALERT_CANCEL_BUTTON_TEXT', 'İptal'),
     ],
 
     /*

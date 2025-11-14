@@ -28,7 +28,11 @@ class AppointmentController extends Controller
 
         SendNewAppointmentRequestToAdminJob::dispatch($appointment);
 
-        toast('Randevu talebi başarıyla oluşturuldu.', 'success');
+        alert(
+            'Başarılı',
+            "Randevu talebi başarıyla oluşturuldu.\nRandevunuz bilgileriniz mail olarak iletilecektir.",
+            'success'
+        );
 
         return redirect()->back();
     }

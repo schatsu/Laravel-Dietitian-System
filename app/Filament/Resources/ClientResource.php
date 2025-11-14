@@ -227,10 +227,12 @@ class ClientResource extends Resource
                                             Forms\Components\TextInput::make('sleep_hours')
                                                 ->label('Uyku Süresi')
                                                 ->numeric()
+                                                ->suffix('Saat')
                                                 ->maxLength(30),
                                             Forms\Components\TextInput::make('water_intake')
                                                 ->label('Günlük Su Tüketimi')
                                                 ->numeric()
+                                                ->suffix('lt')
                                                 ->maxLength(30),
                                             Forms\Components\Textarea::make('extra_notes')
                                                 ->label('Ek Notlar')
