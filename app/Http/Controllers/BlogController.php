@@ -25,10 +25,6 @@ class BlogController extends Controller
 
         /** @var Blog $blogs */
         $blogs = Blog::query()
-            ->select([
-                'title', 'slug', 'status', 'description', 'order', 'category_id', 'is_featured',
-                'content', 'seo_title', 'seo_description',
-            ])
             ->with([
                 'category' => fn($query) => $query->select(['id', 'name']),
                 'media'

@@ -98,7 +98,7 @@
                                 <div
                                     class="blog-box d-md-flex d-block flex-row h-100 border-radius-6px overflow-hidden box-shadow-extra-large">
                                     <div class="blog-image w-50 sm-w-100 cover-background"
-                                         style="background-image: url('{{ $blog->getFirstMediaUrl('blog', 'cover_image') ?: 'https://placehold.co/800x923' }}')">
+                                         style="background-image: url('{{$blog?->getFirstMediaUrl('blogs', 'cover_image')}}')">
                                         <a href="{{ route('blogs.show', ['blog' => $blog->slug]) }}"></a>
                                     </div>
                                     <div class="blog-content w-50 sm-w-100 pt-50px pb-40px ps-40px pe-40px xl-p-30px bg-white d-flex flex-column justify-content-center align-items-start last-paragraph-no-margin">
