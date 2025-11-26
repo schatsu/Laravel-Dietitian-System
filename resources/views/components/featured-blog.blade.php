@@ -17,7 +17,7 @@
                                 <div class="card border-0 border-radius-5px box-shadow-quadruple-large box-shadow-quadruple-large-hover">
                                     <div class="blog-image">
                                         <a href="{{route('blogs.show', ['blog' => $blog?->slug])}}" class="d-block">
-                                            <img src="{{$blog?->getFirstMediaUrl('blogs', 'cover_image')}}" alt="{{$blog?->title}}" />
+                                            <img src="{{$blog?->getFirstMediaUrl('blogs', 'cover_image') ?: 'https://placehold.co/600x430'}}" alt="{{$blog?->title}}" />
                                         </a>
                                         <div class="blog-categories">
                                             <a href="{{route('blogs.show', ['blog' => $blog?->slug])}}" class="categories-btn bg-white text-dark-gray text-dark-gray-hover text-uppercase fw-700">
