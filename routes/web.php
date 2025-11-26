@@ -23,8 +23,7 @@ Route::get('tags/{tag}', [TagController::class, 'show'])->name('tags.show');
 Route::get('iletisim', [PageController::class, 'contact'])->name('contact');
 Route::get('randevu-al', [AppointmentController::class, 'index'])->name('appointments.index');
 Route::post('randevu-al', [AppointmentController::class, 'store'])->name('appointments.store');
-Route::get('/appointment-slots/by-date', [AppointmentController::class, 'getByDate'])
-    ->name('appointment-slots.by-date');
-
+Route::get('/appointment-slots/by-date', [AppointmentController::class, 'getByDate'])->name('appointment-slots.by-date');
 Route::post('submit-message', ContactMessageController::class)->name('submit-message');
+Route::get('/{slug}', [PageController::class, 'show'])->name('page.show');
 

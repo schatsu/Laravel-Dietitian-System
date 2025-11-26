@@ -75,8 +75,9 @@
             <!-- start footer menu -->
             <div class="col-lg-7 pt-35px pb-35px md-pt-25px md-pb-5px order-1 order-lg-2 text-center text-lg-end">
                 <ul class="footer-navbar sm-lh-normal">
-                    <li><a href="#" class="nav-link">Gizlilik politikası</a></li>
-                    <li><a href="#" class="nav-link">Şartlar ve koşullar</a></li>
+                    @foreach($pages as $page)
+                        <li><a href="{{route('page.show', ['slug' => $page?->slug])}}" class="nav-link">{{$page?->title}}</a></li>
+                    @endforeach
                 </ul>
             </div>
             <!-- end footer menu -->
