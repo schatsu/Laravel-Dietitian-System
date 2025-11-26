@@ -20,7 +20,7 @@ class FeaturedBlog extends Component
     {
         $this->featuredBlogs = Cache::remember('featured_blogs', 3600, function () {
             return Blog::query()
-                ->with(['category'])
+                ->with(['category', 'media'])
                 ->where('status', BlogStatusEnum::ACTIVE)
                 ->where('is_featured', true)
                 ->orderBy('order')

@@ -15,7 +15,7 @@ class BlogController extends Controller
     public function index()
     {
         $categories = Category::query()
-            ->select(['id', 'name', 'slug', 'status', 'description', 'order', 'parent_id',])
+            ->select(['id', 'name', 'slug', 'status', 'description', 'order', 'parent_id'])
             ->where('status', true)
             ->whereHas('blogs', function ($q) {
                 $q->where('status', BlogStatusEnum::ACTIVE);
@@ -31,6 +31,7 @@ class BlogController extends Controller
             ])
             ->with([
                 'category' => fn($query) => $query->select(['id', 'name']),
+                'media'
             ])
             ->where('status', BlogStatusEnum::ACTIVE)
             ->orderBy('order')
@@ -42,7 +43,7 @@ class BlogController extends Controller
     public function show(string $slug)
     {
         $categories = Category::query()
-            ->select(['id', 'name', 'slug', 'status', 'description', 'order', 'parent_id',])
+            ->select(['id', 'name', 'slug', 'status', 'description', 'order', 'parent_id'])
             ->where('status', true)
             ->whereHas('blogs', function ($q) {
                 $q->where('status', BlogStatusEnum::ACTIVE);
@@ -57,6 +58,7 @@ class BlogController extends Controller
             ->with([
                 'category',
                 'tags',
+                'media'
             ])
             ->firstOrFail();
 
