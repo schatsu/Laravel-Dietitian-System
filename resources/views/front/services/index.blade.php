@@ -22,7 +22,7 @@
                 @foreach($services as $service)
                     <div class="col interactive-banner-style-08 md-mb-30px mb-lg-4">
                         <figure class="m-0 hover-box overflow-hidden position-relative border-radius-6px">
-                            <img src="{{$service->getFirstMediaUrl('images', 'thumb')}}" alt="{{$service?->name}}"/>
+                            <img src="{{$service->getFirstMediaUrl('images', 'small')}}" alt="{{$service?->name}}"/>
                             <figcaption class="d-flex flex-column align-items-start justify-content-center position-absolute left-0px top-0px w-100 h-100 z-index-1 p-50px sm-p-6">
                                 <div class="d-flex w-100 align-items-center mt-auto">
                                     <div class="col last-paragraph-no-margin pe-15px">
