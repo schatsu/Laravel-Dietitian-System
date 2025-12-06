@@ -14,6 +14,7 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Support\Assets\Js;
 use Filament\Support\Colors\Color;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -43,7 +44,6 @@ class AdminPanelProvider extends PanelProvider
             ->unsavedChangesAlerts()
             ->login()
             ->profile(isSimple: false)
-            ->unsavedChangesAlerts()
             ->brandName($generalSettings->site_name ?? 'Dyt.Ayşe Yılmaz')
             ->brandLogo(fn() => view('filament.components.brand-logo', [
                 'generalSettings' => $generalSettings ?? null,
@@ -98,7 +98,7 @@ class AdminPanelProvider extends PanelProvider
                 'Kullanıcı Yönetimi',
                 'Site Ayarları'
             ])
-            ->sidebarCollapsibleOnDesktop()
+            ->topNavigation()
             ->authMiddleware([
                 Authenticate::class,
             ]);

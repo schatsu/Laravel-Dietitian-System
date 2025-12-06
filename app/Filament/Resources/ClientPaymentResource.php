@@ -65,7 +65,7 @@ class ClientPaymentResource extends Resource
                                     ->options(ClientPaymentMethodEnum::options())
                                     ->required(),
                                 Forms\Components\Select::make('payment_status')
-                                    ->label('Ödeme Türü')
+                                    ->label('Ödeme Durumu')
                                     ->options(ClientPaymentStatusEnum::options())
                                     ->required(),
                                 Forms\Components\DatePicker::make('payment_date')
