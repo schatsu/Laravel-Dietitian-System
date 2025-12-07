@@ -99,6 +99,7 @@ class WeeklyScheduleResource extends Resource
                         4 => 'Perşembe',
                         5 => 'Cuma',
                         6 => 'Cumartesi',
+                        7 => 'Pazar',
                         default => 'Bilinmiyor',
                     })
                     ->sortable(),

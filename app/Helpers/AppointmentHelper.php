@@ -20,7 +20,7 @@ class AppointmentHelper
 
         for ($i = 0; $i < $days; $i++) {
             $date = $startDate->copy()->addDays($i);
-            $dayOfWeek = $date->dayOfWeek;
+            $dayOfWeek = $date->dayOfWeekIso;
 
             $schedules = WeeklySchedule::query()->where('day_of_week', $dayOfWeek)
                 ->where('is_active', true)
