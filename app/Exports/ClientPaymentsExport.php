@@ -11,7 +11,7 @@ class ClientPaymentsExport implements FromCollection, WithHeadings
 {
     public function collection(): Collection|\Illuminate\Support\Collection
     {
-        return ClientPayment::with('client')->get()->map(function ($payment) {
+        return ClientPayment::query()->with('client')->get()->map(function ($payment) {
             return [
                 'Danışan' => $payment->client->full_name,
                 'Seans Tarihi' => $payment->session_date,

@@ -3,10 +3,13 @@
 namespace App\Filament\Resources;
 
 use App\Enums\AppointmentStatusEnum;
+use App\Exports\AppointmentListExport;
+use App\Exports\ClientPaymentsExport;
 use App\Filament\Resources\AppointmentResource\Pages;
 use App\Filament\Resources\AppointmentResource\RelationManagers;
 use App\Models\Appointment;
 use App\Models\AppointmentSlot;
+use Exception;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -15,8 +18,10 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 class AppointmentResource extends Resource
@@ -91,9 +96,20 @@ class AppointmentResource extends Resource
             ]);
     }
 
+    /**
+     * @throws Exception
+     */
     public static function table(Table $table): Table
     {
         return $table
+            ->heading('Randevular')
+            ->description('Randevularınızı buradan görüntüleyebilirsiniz.')
+            ->headerActions([
+                Action::make('export_excel')
+                    ->label('Excel İndir')
+                    ->icon('heroicon-o-document')
+                    ->action(fn() => Excel::download(new AppointmentListExport, 'randevular.xlsx')),
+            ])
             ->columns([
                 TextColumn::make('slot.date')
                     ->label('Tarih')
@@ -140,7 +156,9 @@ class AppointmentResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                ->label('Durum')
+                ->options(AppointmentStatusEnum::options()),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([

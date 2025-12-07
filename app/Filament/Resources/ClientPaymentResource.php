@@ -91,7 +91,7 @@ class ClientPaymentResource extends Resource
     {
         return $table
             ->heading('Danışan Ödemeleri')
-            ->description('Danışanlarınızın yaptığı ödemeleri buradan görebilirsiniz.')
+            ->description('Kayıt ettiğiniz ödemeleri buradan görüntüleyebilirsiniz.')
             ->headerActions([
                 Action::make('export_excel')
                     ->label('Excel İndir')
