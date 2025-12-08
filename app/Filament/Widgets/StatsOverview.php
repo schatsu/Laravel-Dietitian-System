@@ -7,131 +7,105 @@ use App\Models\Appointment;
 use App\Models\Blog;
 use App\Models\Client;
 use App\Models\Service;
+use Closure;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 
 class StatsOverview extends BaseWidget
 {
-    protected static ?string $pollingInterval = '60s';
+    protected static ?string $pollingInterval = '30';
 
-    /**
-     * Build all stats
-     *
-     * @return array<int, Stat>
-     */
     protected function getStats(): array
     {
         return [
-            $this->getClientsStat(),
-            $this->getAppointmentsStat(),
-            $this->getServicesStat(),
-            $this->getBlogsStat(),
-            $this->getApprovedAppointmentsStat(),
-            $this->getRejectedAppointmentsStat(),
+
+            $this->buildTrendStat(Client::class, 'Toplam Danışan'),
+
+
+            $this->buildTrendStat(Appointment::class, 'Toplam Randevu'),
+
+
+            $this->buildTrendStat(
+                Appointment::class,
+                'Onaylanan Randevu',
+                fn (Builder $query) => $query->where('status', AppointmentStatusEnum::APPROVED)
+            ),
+
+
+            $this->buildTrendStat(
+                Appointment::class,
+                'Reddedilen Randevu',
+                fn (Builder $query) => $query->where('status', AppointmentStatusEnum::REJECTED)
+            ),
+
+
+            $this->buildTrendStat(Service::class, 'Toplam Hizmet'),
+
+
+            $this->buildTrendStat(Blog::class, 'Toplam Blog'),
         ];
     }
 
-    protected function getAppointmentsStat(): Stat
+    /**
+     * *
+     * @param string $model
+     * @param string $label
+     * @param Closure|null $modifyQuery
+     * @return Stat
+     */
+    protected function buildTrendStat(string $model, string $label, ?Closure $modifyQuery = null): Stat
     {
-        $totalAppointments = Appointment::query()->count();
 
-        $days = collect(range(6, 0))->map(fn($i) => Carbon::today()->subDays($i));
-        $chartData = $days
-            ->map(fn($day) => Appointment::query()->whereDate('created_at', $day)->count())
-            ->toArray();
+        $query = $model::query();
 
-        $todayCount = Appointment::query()->whereDate('created_at', Carbon::today())->count();
-        $yesterdayCount = Appointment::query()->whereDate('created_at', Carbon::yesterday())->count();
 
-        $increasePercent = $yesterdayCount > 0
-            ? round((($todayCount - $yesterdayCount) / $yesterdayCount) * 100)
-            : $todayCount;
+        if ($modifyQuery) {
+            $modifyQuery($query);
+        }
+
+
+        $totalCount = (clone $query)->count();
+
+
+        $chartData = collect(range(6, 0))->map(function ($i) use ($query) {
+
+            return (clone $query)
+                ->whereDate('created_at', Carbon::today()->subDays($i))
+                ->count();
+        })->toArray();
+
+
+        $todayCount = (clone $query)->whereDate('created_at', Carbon::today())->count();
+        $yesterdayCount = (clone $query)->whereDate('created_at', Carbon::yesterday())->count();
+
+
+        $increasePercent = 0;
+        if ($yesterdayCount > 0) {
+            $increasePercent = (($todayCount - $yesterdayCount) / $yesterdayCount) * 100;
+        } elseif ($todayCount > 0) {
+            $increasePercent = 100;
+        }
 
         $color = 'warning';
         $icon = 'heroicon-m-minus';
-        $description = '0% değişim';
+        $description = 'Düne göre değişim yok';
 
         if ($increasePercent > 0) {
             $color = 'success';
             $icon = 'heroicon-m-arrow-trending-up';
-            $description = '+' . $increasePercent . '% artış';
+            $description = 'Düne göre %' . round($increasePercent) . ' artış';
         } elseif ($increasePercent < 0) {
             $color = 'danger';
             $icon = 'heroicon-m-arrow-trending-down';
-            $description = $increasePercent . '% azalış';
+            $description = 'Düne göre %' . abs(round($increasePercent)) . ' azalış';
         }
 
-        return Stat::make('Toplam Randevu', $totalAppointments)
+        return Stat::make($label, $totalCount)
             ->description($description)
             ->descriptionIcon($icon)
             ->chart($chartData)
             ->color($color);
     }
-
-    protected function getClientsStat(): Stat
-    {
-        $totalClients = Client::query()->count();
-
-        $days = collect(range(6, 0))->map(fn($i) => Carbon::today()->subDays($i));
-        $chartData = $days
-            ->map(fn($day) => Client::query()->whereDate('created_at', $day)->count())
-            ->toArray();
-
-        $todayCount = Client::query()->whereDate('created_at', Carbon::today())->count();
-        $yesterdayCount = Client::query()->whereDate('created_at', Carbon::yesterday())->count();
-
-        $increasePercent = $yesterdayCount > 0
-            ? round((($todayCount - $yesterdayCount) / $yesterdayCount) * 100)
-            : $todayCount;
-
-        $color = 'warning';
-        $icon = 'heroicon-m-minus';
-        $description = '0% değişim';
-
-        if ($increasePercent > 0) {
-            $color = 'success';
-            $icon = 'heroicon-m-arrow-trending-up';
-            $description = '+' . $increasePercent . '% artış';
-        } elseif ($increasePercent < 0) {
-            $color = 'danger';
-            $icon = 'heroicon-m-arrow-trending-down';
-            $description = $increasePercent . '% azalış';
-        }
-
-        return Stat::make('Toplam Danışan', $totalClients)
-            ->description($description)
-            ->descriptionIcon($icon)
-            ->chart($chartData)
-            ->color($color);
-    }
-
-    protected function getBlogsStat(): Stat
-    {
-        $totalBlogs = Blog::query()->count();
-        return Stat::make('Toplam Blog', $totalBlogs);
-    }
-
-    public static function getServicesStat(): Stat
-    {
-        $totalService = Service::query()->count();
-        return Stat::make('Toplam Hizmet', $totalService);
-    }
-
-    public static function getApprovedAppointmentsStat(): Stat
-    {
-        $approvedAppointments = Appointment::query()
-            ->where('status', AppointmentStatusEnum::APPROVED)
-            ->count();
-        return Stat::make('Onaylanan Randevu', $approvedAppointments);
-    }
-
-    public static function getRejectedAppointmentsStat(): Stat
-    {
-        $rejectedAppointments = Appointment::query()
-            ->where('status', AppointmentStatusEnum::REJECTED)
-            ->count();
-        return Stat::make('Reddedilen Randevu', $rejectedAppointments);
-    }
-
 }
