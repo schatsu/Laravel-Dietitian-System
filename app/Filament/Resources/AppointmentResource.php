@@ -4,12 +4,12 @@ namespace App\Filament\Resources;
 
 use App\Enums\AppointmentStatusEnum;
 use App\Exports\AppointmentListExport;
-use App\Exports\ClientPaymentsExport;
 use App\Filament\Resources\AppointmentResource\Pages;
-use App\Filament\Resources\AppointmentResource\RelationManagers;
-use App\Models\Appointment;
-use App\Models\AppointmentSlot;
+use App\Models\User;
+use App\Services\BookAppointmentService;
+use Carbon\Carbon;
 use Exception;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -22,11 +22,12 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Maatwebsite\Excel\Facades\Excel;
-
+use Zap\Facades\Zap;
+use Zap\Models\Schedule;
 
 class AppointmentResource extends Resource
 {
-    protected static ?string $model = Appointment::class;
+    protected static ?string $model = Schedule::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-list-bullet';
     protected static ?string $navigationLabel = 'Randevular';
@@ -42,53 +43,73 @@ class AppointmentResource extends Resource
                 Section::make('Randevu Bilgileri')
                     ->schema([
                         Grid::make(2)->schema([
-                            Select::make('slot_date')
+                            DatePicker::make('appointment_date')
                                 ->label('Randevu Tarihi')
                                 ->required()
                                 ->reactive()
-                                ->searchable()
-                                ->preload()
-                                ->options(function () {
-                                    return AppointmentSlot::query()
-                                        ->where('is_active', true)
-                                        ->where('is_booked', false)
-                                        ->orderBy('date')
-                                        ->pluck('date', 'date')
-                                        ->unique();
-                                }),
+                                ->native(false)
+                                ->placeholder('Randevu Tarihi Seçiniz')
+                                ->minDate(now())
+                                ->afterStateUpdated(fn (callable $set) => $set('time_slot', null)),
 
-                            Select::make('appointment_slot_id')
-                            ->label('Randevu Saati')
+                            Select::make('time_slot')
+                                ->label('Randevu Saati')
                                 ->required()
                                 ->searchable()
-                                ->preload()
-                                ->disabled(fn (callable $get) => !$get('slot_date'))
+                                ->reactive()
+                                ->native(false)
+                                ->placeholder('Randevu Saati Seçiniz')
+                                ->disabled(fn (callable $get) => !$get('appointment_date'))
                                 ->options(function (callable $get) {
-                                    $date = $get('slot_date');
+                                    $date = $get('appointment_date');
                                     if (!$date) {
                                         return [];
                                     }
 
-                                    return AppointmentSlot::query()
-                                        ->where('date', $date)
-                                        ->where('is_active', true)
-                                        ->where('is_booked', false)
-                                        ->orderBy('start_time')
-                                        ->get()
+                                    // Tarihi Carbon ile düzgün formata çevir (Y-m-d)
+                                    $formattedDate = \Carbon\Carbon::parse($date)->format('Y-m-d');
+
+                                    $service = new BookAppointmentService();
+                                    $slots = $service->getAvailableSlots($formattedDate);
+
+                                    return collect($slots)
+                                        ->filter(fn ($slot) => $slot['is_available'] ?? false)
                                         ->mapWithKeys(fn ($slot) => [
-                                            $slot->id => $slot->start_time . ' - ' . $slot->end_time,
-                                        ]);
-                                }),
+                                            $slot['start_time'] . '-' . $slot['end_time'] =>
+                                                $slot['start_time'] . ' - ' . $slot['end_time'],
+                                        ])
+                                        ->toArray();
+                                })
+                                ->helperText(fn (callable $get) =>
+                                    $get('appointment_date')
+                                        ? 'Seçilen tarihteki müsait saatler'
+                                        : 'Önce tarih seçin'
+                                ),
 
-                            TextInput::make('name')->label('Danışan Adı')->required()->maxLength(255),
+                            TextInput::make('metadata.client_name')
+                                ->label('Danışan Adı')
+                                ->required()
+                                ->maxLength(255),
 
-                            TextInput::make('email')->label('E-posta')->email()->prefix('@')->maxLength(255),
+                            TextInput::make('metadata.client_email')
+                                ->label('E-posta')
+                                ->email()
+                                ->prefix('@')
+                                ->maxLength(255),
 
-                            TextInput::make('phone')->label('Telefon')->prefix('+90')->mask('(999) 999 99 99')->maxLength(50),
-                            Select::make('status')->label('Durum')
-                                ->options(AppointmentStatusEnum::options()),
+                            TextInput::make('metadata.client_phone')
+                                ->label('Telefon')
+                                ->prefix('+90')
+                                ->mask('(999) 999 99 99')
+                                ->maxLength(50),
 
-                            Textarea::make('note')->label('Not')
+                            Select::make('metadata.status')
+                                ->label('Durum')
+                                ->options(AppointmentStatusEnum::options())
+                                ->default('pending'),
+
+                            Textarea::make('metadata.note')
+                                ->label('Not')
                                 ->columnSpanFull()
                                 ->maxLength(1000),
                         ]),
@@ -103,7 +124,15 @@ class AppointmentResource extends Resource
     {
         return $table
             ->heading('Randevular')
-            ->description('Randevularınızı buradan görüntüleyebilirsiniz.')
+            ->description('Tüm randevularınızı buradan görüntüleyebilirsiniz.')
+            ->modifyQueryUsing(function ($query) {
+                $dietitian = User::role('super_admin')->first();
+                if ($dietitian) {
+                    $query->where('schedulable_type', User::class)
+                          ->where('schedulable_id', $dietitian->id)
+                          ->where('schedule_type', \Zap\Enums\ScheduleTypes::APPOINTMENT);
+                }
+            })
             ->headerActions([
                 Action::make('export_excel')
                     ->label('Excel İndir')
@@ -111,72 +140,110 @@ class AppointmentResource extends Resource
                     ->action(fn() => Excel::download(new AppointmentListExport, 'randevular.xlsx')),
             ])
             ->columns([
-                TextColumn::make('slot.date')
+                TextColumn::make('start_date')
                     ->label('Tarih')
-                    ->date()
+                    ->date('d.m.Y')
                     ->sortable()
                     ->searchable(),
 
-                TextColumn::make('slot.start_time')
-                    ->label('Başlangıç Saati')
-                    ->dateTime('H:i')
-                    ->sortable(),
+                TextColumn::make('periods')
+                    ->label('Saat')
+                    ->formatStateUsing(function ($record) {
+                        $period = $record->periods->first();
+                        if (!$period) return '-';
+                        return Carbon::parse($period->start_time)->format('H:i') .
+                               ' - ' .
+                               Carbon::parse($period->end_time)->format('H:i');
+                    }),
 
-                TextColumn::make('slot.end_time')
-                    ->label('Bitiş Saati')
-                    ->dateTime('H:i')
-                    ->sortable(),
-
-                TextColumn::make('name')
+                TextColumn::make('metadata.client_name')
                     ->label('Danışan')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable(query: function ($query, $search) {
+                        $query->where('metadata->client_name', 'like', "%{$search}%");
+                    }),
 
-                TextColumn::make('email')
+                TextColumn::make('metadata.client_email')
                     ->label('E-posta')
-                    ->sortable()
                     ->copyable()
-                    ->searchable(),
+                    ->toggleable(),
 
-                TextColumn::make('phone')
+                TextColumn::make('metadata.client_phone')
                     ->label('Telefon')
-                    ->sortable()
                     ->copyable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->label('Durum')
-                    ->formatStateUsing(fn(AppointmentStatusEnum $state) => $state->label())
-                    ->badge()
-                    ->color(fn(AppointmentStatusEnum $state) => $state->color()),
+                    ->toggleable(),
 
-                TextColumn::make('note')
+                TextColumn::make('metadata.status')
+                    ->label('Durum')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'approved' => 'Onaylandı',
+                        'pending' => 'Beklemede',
+                        'rejected' => 'Reddedildi',
+                        default => $state ?? 'Beklemede',
+                    })
+                    ->color(fn (?string $state): string => match ($state) {
+                        'approved' => 'success',
+                        'pending' => 'warning',
+                        'rejected' => 'danger',
+                        default => 'gray',
+                    }),
+
+                TextColumn::make('metadata.note')
                     ->label('Not')
                     ->limit(30)
-                    ->tooltip(fn ($record) => $record->note)
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->tooltip(fn ($record) => $record->metadata['note'] ?? null)
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
-                ->label('Durum')
-                ->options(AppointmentStatusEnum::options()),
+                    ->label('Durum')
+                    ->options(AppointmentStatusEnum::options())
+                    ->query(function ($query, $data) {
+                        if ($data['value']) {
+                            $query->where('metadata->status', $data['value']);
+                        }
+                    }),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('approve')
+                        ->label('Onayla')
+                        ->icon('heroicon-o-check')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->action(function ($record) {
+                            $metadata = $record->metadata ?? [];
+                            $metadata['status'] = 'approved';
+                            $record->update(['metadata' => $metadata]);
+                        })
+                        ->visible(fn ($record) => ($record->metadata['status'] ?? 'pending') !== 'approved'),
+
+                    Tables\Actions\Action::make('reject')
+                        ->label('Reddet')
+                        ->icon('heroicon-o-x-mark')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->action(function ($record) {
+                            $metadata = $record->metadata ?? [];
+                            $metadata['status'] = 'rejected';
+                            $record->update(['metadata' => $metadata]);
+                        })
+                        ->visible(fn ($record) => ($record->metadata['status'] ?? 'pending') !== 'rejected'),
+
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
                 ])
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
-            ])->defaultSort('created_at', 'desc');
+            ])
+            ->defaultSort('start_date', 'desc');
     }
-
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
@@ -191,6 +258,14 @@ class AppointmentResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::count();
+        $dietitian = User::role('super_admin')->first();
+        if (!$dietitian) {
+            return null;
+        }
+
+        return (string) Schedule::query()->where('schedulable_type', User::class)
+            ->where('schedulable_id', $dietitian->id)
+            ->where('schedule_type', \Zap\Enums\ScheduleTypes::APPOINTMENT)
+            ->count();
     }
 }

@@ -9,6 +9,7 @@ use App\Filament\Resources\ClientPaymentResource\Widgets\ClientPaymentsChart;
 use App\Filament\Resources\ClientPaymentResource\Widgets\ClientPaymentStats;
 use App\Filament\Resources\ClientResource\Widgets\TotalClient;
 use App\Filament\Widgets\StatsOverview;
+use App\Filament\Widgets\UpcomingAppointments;
 use Filament\Pages\Page;
 use Filament\Widgets\StatsOverviewWidget;
 
@@ -27,7 +28,7 @@ class Dashboard extends \Filament\Pages\Dashboard
     }
 
 
-    public function getColumns(): int | string | array
+    public function getColumns(): int|string|array
     {
         return 2;
     }

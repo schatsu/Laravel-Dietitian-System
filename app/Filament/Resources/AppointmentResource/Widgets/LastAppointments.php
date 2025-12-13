@@ -2,61 +2,79 @@
 
 namespace App\Filament\Resources\AppointmentResource\Widgets;
 
-use App\Enums\AppointmentStatusEnum;
-use App\Models\Appointment;
+use App\Models\User;
+use Carbon\Carbon;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Zap\Enums\ScheduleTypes;
+use Zap\Models\Schedule;
 
 class LastAppointments extends BaseWidget
 {
     protected int|string|array $columnSpan = 'full';
     protected static ?string $heading = 'Son 5 Randevu';
+
     public function table(Table $table): Table
     {
+        $dietitian = User::role('super_admin')->first();
+
         return $table
             ->query(
-               Appointment::query()
-                ->with('slot')
-                ->select(['appointment_slot_id','id', 'name', 'email', 'phone', 'status'])
-                ->latest()
-                ->limit(5)
+                Schedule::query()
+                    ->where('schedulable_type', User::class)
+                    ->where('schedulable_id', $dietitian?->id)
+                    ->where('schedule_type', ScheduleTypes::APPOINTMENT)
+                    ->with('periods')
+                    ->latest()
+                    ->limit(5)
             )
             ->columns([
-                TextColumn::make('slot.date')
+                TextColumn::make('start_date')
                     ->label('Tarih')
                     ->date(format: 'd.m.Y')
                     ->sortable(),
 
-                TextColumn::make('slot.start_time')
-                    ->label('Başlangıç Saati')
-                    ->date(format: 'H:i')
-                    ->sortable(),
+                TextColumn::make('periods')
+                    ->label('Saat')
+                    ->formatStateUsing(function ($state, $record) {
+                        $period = $record->periods->first();
+                        if ($period) {
+                            return Carbon::parse($period->start_time)->format('H:i') . ' - ' . Carbon::parse($period->end_time)->format('H:i');
+                        }
+                        return '-';
+                    }),
 
-                TextColumn::make('slot.end_time')
-                    ->label('Bitiş Saati')
-                    ->date(format: 'H:i')
-                    ->sortable(),
-
-                TextColumn::make('name')
+                TextColumn::make('metadata.client_name')
                     ->label('Danışan')
-                    ->sortable(),
+                    ->default('-'),
 
-                TextColumn::make('email')
+                TextColumn::make('metadata.client_email')
                     ->label('E-posta')
-                    ->sortable()
+                    ->default('-')
                     ->copyable(),
 
-                TextColumn::make('phone')
+                TextColumn::make('metadata.client_phone')
                     ->label('Telefon')
-                    ->sortable()
+                    ->default('-')
                     ->copyable(),
-                Tables\Columns\TextColumn::make('status')
+
+                TextColumn::make('metadata.status')
                     ->label('Durum')
-                    ->formatStateUsing(fn(AppointmentStatusEnum $state) => $state->label())
                     ->badge()
-                    ->color(fn(AppointmentStatusEnum $state) => $state->color()),
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'approved' => 'Onaylandı',
+                        'pending' => 'Beklemede',
+                        'rejected' => 'Reddedildi',
+                        default => $state ?? 'Beklemede',
+                    })
+                    ->color(fn($state) => match ($state) {
+                        'approved' => 'success',
+                        'pending' => 'warning',
+                        'rejected' => 'danger',
+                        default => 'warning',
+                    }),
             ])
             ->paginated(false)
             ->emptyStateHeading('Henüz randevu bulunmuyor')

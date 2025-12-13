@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\AppointmentResource\Pages;
 
 use App\Filament\Resources\AppointmentResource;
-use App\Filament\Resources\AppointmentResource\Widgets\CalendarWidget;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -14,12 +13,14 @@ class ListAppointments extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
             Actions\Action::make('calendar')
                 ->label('Takvim Görünümü')
                 ->icon('heroicon-o-calendar')
-                ->color('danger')
+                ->color('info')
                 ->url(static::getResource()::getUrl('calendar')),
+
+            Actions\CreateAction::make()
+                ->label('Yeni Randevu'),
         ];
     }
 }

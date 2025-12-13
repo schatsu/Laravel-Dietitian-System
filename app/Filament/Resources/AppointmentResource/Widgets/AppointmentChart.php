@@ -2,14 +2,15 @@
 
 namespace App\Filament\Resources\AppointmentResource\Widgets;
 
-use App\Enums\AppointmentStatusEnum;
-use App\Models\Appointment;
+use App\Models\User;
+use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
+use Zap\Enums\ScheduleTypes;
+use Zap\Models\Schedule;
 
 class AppointmentChart extends ChartWidget
 {
     protected static ?string $heading = 'Aylık Randevu Sayısı';
-
 
     public ?string $filter = 'this_year';
 
@@ -34,30 +35,40 @@ class AppointmentChart extends ChartWidget
         $rejected = [];
 
         $year = $this->filter === 'this_year' ? now()->year : (int) $this->filter;
+        $dietitian = User::role('super_admin')->first();
 
         foreach (range(1, 12) as $month) {
-            $approved[] = Appointment::query()
-                ->whereHas('slot', function ($q) use ($month, $year) {
-                    $q->whereMonth('date', $month)
-                        ->whereYear('date', $year);
-                })
-                ->where('status', AppointmentStatusEnum::APPROVED)
+            // Onaylanan randevular
+            $approved[] = Schedule::query()
+                ->where('schedulable_type', User::class)
+                ->where('schedulable_id', $dietitian?->id)
+                ->where('schedule_type', ScheduleTypes::APPOINTMENT)
+                ->whereMonth('start_date', $month)
+                ->whereYear('start_date', $year)
+                ->whereJsonContains('metadata->status', 'approved')
                 ->count();
 
-            $pending[] = Appointment::query()
-                ->whereHas('slot', function ($q) use ($month, $year) {
-                    $q->whereMonth('date', $month)
-                        ->whereYear('date', $year);
+            // Bekleyen randevular
+            $pending[] = Schedule::query()
+                ->where('schedulable_type', User::class)
+                ->where('schedulable_id', $dietitian?->id)
+                ->where('schedule_type', ScheduleTypes::APPOINTMENT)
+                ->whereMonth('start_date', $month)
+                ->whereYear('start_date', $year)
+                ->where(function ($query) {
+                    $query->whereJsonContains('metadata->status', 'pending')
+                        ->orWhereNull('metadata->status');
                 })
-                ->where('status', AppointmentStatusEnum::PENDING)
                 ->count();
 
-            $rejected[] = Appointment::query()
-                ->whereHas('slot', function ($q) use ($month, $year) {
-                    $q->whereMonth('date', $month)
-                        ->whereYear('date', $year);
-                })
-                ->where('status', AppointmentStatusEnum::REJECTED)
+            // Reddedilen randevular
+            $rejected[] = Schedule::query()
+                ->where('schedulable_type', User::class)
+                ->where('schedulable_id', $dietitian?->id)
+                ->where('schedule_type', ScheduleTypes::APPOINTMENT)
+                ->whereMonth('start_date', $month)
+                ->whereYear('start_date', $year)
+                ->whereJsonContains('metadata->status', 'rejected')
                 ->count();
         }
 
@@ -69,24 +80,27 @@ class AppointmentChart extends ChartWidget
                     'data' => $approved,
                     'backgroundColor' => 'rgba(34,197,94,0.7)',
                     'borderColor' => 'rgba(34,197,94,1)',
-                    'borderWidth' => 1,
+                    'borderWidth' => 2,
                     'hoverBackgroundColor' => 'rgba(34,197,94,0.9)',
+                    'tension' => 0.3,
                 ],
                 [
                     'label' => 'Beklemede',
                     'data' => $pending,
                     'backgroundColor' => 'rgba(250,204,21,0.7)',
                     'borderColor' => 'rgba(250,204,21,1)',
-                    'borderWidth' => 1,
+                    'borderWidth' => 2,
                     'hoverBackgroundColor' => 'rgba(250,204,21,0.9)',
+                    'tension' => 0.3,
                 ],
                 [
                     'label' => 'Reddedilen',
                     'data' => $rejected,
                     'backgroundColor' => 'rgba(239,68,68,0.7)',
                     'borderColor' => 'rgba(239,68,68,1)',
-                    'borderWidth' => 1,
+                    'borderWidth' => 2,
                     'hoverBackgroundColor' => 'rgba(239,68,68,0.9)',
+                    'tension' => 0.3,
                 ],
             ],
         ];
@@ -96,6 +110,7 @@ class AppointmentChart extends ChartWidget
     {
         return 'line';
     }
+
     protected function getOptions(): array
     {
         return [
@@ -106,6 +121,12 @@ class AppointmentChart extends ChartWidget
                         'stepSize' => 1,
                         'precision' => 0,
                     ],
+                ],
+            ],
+            'plugins' => [
+                'legend' => [
+                    'display' => true,
+                    'position' => 'top',
                 ],
             ],
         ];

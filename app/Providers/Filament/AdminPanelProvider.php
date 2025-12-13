@@ -59,10 +59,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-//                TotalClient::class,
-//                AppointmentOverview::class,
-//                LastAppointments::class,
-//                ClientPaymentsChart::class,
+              Dashboard::class
             ])
             ->middleware([
                 EncryptCookies::class,
