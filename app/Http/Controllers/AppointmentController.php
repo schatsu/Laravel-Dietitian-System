@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\GetAppointmentSlotsRequest;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Jobs\SendNewAppointmentRequestToAdminJob;
-use App\Models\Appointment;
-use App\Models\AppointmentSlot;
-use Illuminate\Http\Request;
+use App\Services\BookAppointmentService;
 
 class AppointmentController extends Controller
 {
+    public function __construct(
+        protected BookAppointmentService $bookAppointmentService
+    ) {}
+
     public function index()
     {
         return view('front.appointment.index');
@@ -18,15 +19,22 @@ class AppointmentController extends Controller
 
     public function store(StoreAppointmentRequest $request)
     {
-        $attributes = collect($request->validated());
+        $data = $request->validated();
 
-        $slot = AppointmentSlot::query()->findOrFail($attributes->get('appointment_slot_id'));
+        $appointment = $this->bookAppointmentService->bookAppointment(
+            date: $data['date'],
+            startTime: $data['start_time'],
+            endTime: $data['end_time'],
+            clientData: [
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'phone' => $data['phone'],
+                'note' => $data['note'] ?? null,
+                'status' => 'pending',
+            ]
+        );
 
-        $appointment = Appointment::query()->create($attributes->toArray());
-
-        $slot->update(['is_booked' => true]);
-
-        SendNewAppointmentRequestToAdminJob::dispatch($appointment);
+        //SendNewAppointmentRequestToAdminJob::dispatch($appointment);
 
         alert(
             'Başarılı',
@@ -37,17 +45,16 @@ class AppointmentController extends Controller
         return redirect()->back();
     }
 
-    public function getByDate(GetAppointmentSlotsRequest $request)
+    public function getByDate()
     {
-        $attributes = collect($request->validated());
+        $date = request('date');
 
-        $slots = AppointmentSlot::query()
-            ->select(['id', 'start_time', 'end_time'])
-            ->where('is_active', true)
-            ->where('is_booked', false)
-            ->whereDate('date', $attributes->get('date'))
-            ->orderBy('start_time')
-            ->get();
+        if (!$date) {
+            return response()->json([]);
+        }
+
+        $slots = $this->bookAppointmentService->getAvailableSlots($date);
+
 
         return response()->json($slots);
     }

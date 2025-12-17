@@ -77,7 +77,70 @@ class BookAppointmentService
         $duration = $duration ?? $settings['session_duration'];
         $buffer = $buffer ?? $settings['buffer_time'];
 
-        return $this->dietitian->getBookableSlots($date, $duration, $buffer);
+        $slots = $this->dietitian->getBookableSlots($date, $duration, $buffer);
+
+        $dayOfWeek = strtolower(Carbon::parse($date)->format('l'));
+
+        $isDateBlocked = $this->dietitian->blockedSchedules()
+            ->where('is_active', true)
+            ->get()
+            ->contains(function ($schedule) use ($date, $dayOfWeek) {
+                $startDate = $schedule->start_date instanceof Carbon
+                    ? $schedule->start_date->format('Y-m-d')
+                    : substr($schedule->start_date, 0, 10);
+                $endDate = $schedule->end_date instanceof Carbon
+                    ? $schedule->end_date->format('Y-m-d')
+                    : ($schedule->end_date ? substr($schedule->end_date, 0, 10) : null);
+
+                if ($schedule->is_recurring && $schedule->frequency === 'weekly') {
+                    $blockedDays = $schedule->frequency_config['days'] ?? [];
+                    if (in_array($dayOfWeek, $blockedDays)) {
+                        if ($date >= $startDate && (!$endDate || $date <= $endDate)) {
+                            return true;
+                        }
+                    }
+                }
+
+                if (!$schedule->is_recurring) {
+                    if ($date >= $startDate && (!$endDate || $date <= $endDate)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            });
+
+        if ($isDateBlocked) {
+            return array_map(function ($slot) {
+                return array_merge($slot, ['available' => false]);
+            }, $slots);
+        }
+
+        $existingAppointments = $this->dietitian->appointmentSchedules()
+            ->with('periods')
+            ->get()
+            ->flatMap(function ($schedule) use ($date) {
+                return $schedule->periods->filter(function ($period) use ($date) {
+                    $periodDate = $period->date instanceof Carbon
+                        ? $period->date->format('Y-m-d')
+                        : (string) $period->date;
+                    return $periodDate === $date;
+                })->map(function ($period) {
+                    $startTime = substr($period->start_time, 0, 5);
+                    $endTime = substr($period->end_time, 0, 5);
+                    return $startTime . '-' . $endTime;
+                });
+            })
+            ->toArray();
+
+        return array_map(function ($slot) use ($existingAppointments) {
+            $slotKey = $slot['start_time'] . '-' . $slot['end_time'];
+            $isBooked = in_array($slotKey, $existingAppointments);
+
+            return array_merge($slot, [
+                'available' => !$isBooked,
+            ]);
+        }, $slots);
     }
 
     public function getSessionSettings(): array

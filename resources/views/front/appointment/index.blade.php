@@ -21,10 +21,18 @@
         }
 
         .badge-slot.active {
-            background-color: var(--base-color);;
+            background-color: var(--base-color);
             color: white;
-            border-color: var(--base-color);;
+            border-color: var(--base-color);
             font-weight: 600;
+        }
+
+        .badge-slot.disabled {
+            background-color: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+            pointer-events: none;
         }
 
         #available-slots {
@@ -40,7 +48,7 @@
             <div class="row justify-content-center mb-3">
                 <div class="col-lg-12 text-center appear anime-child anime-complete"
                      data-anime="{ &quot;el&quot;: &quot;childs&quot;, &quot;translateY&quot;: [30, 0], &quot;opacity&quot;: [0,1], &quot;duration&quot;: 600, &quot;delay&quot;: 0, &quot;staggervalue&quot;: 300, &quot;easing&quot;: &quot;easeOutQuad&quot; }">
-                    <h2 class="text-dark-gray  ls-minus-1px">Radenvu Al</h2>
+                    <h2 class="text-dark-gray  ls-minus-1px">Randevu Al</h2>
                     <div class="mt-auto justify-content-start breadcrumb breadcrumb-style-01 fs-14 text-dark-gray">
                         <ul>
                             <li><a href="{{route('home')}}"
@@ -113,7 +121,9 @@
                             <div id="selected-slot" class="mt-2 text-primary fw-semibold"></div>
                         </div>
 
-                        <select id="appointment-slot" name="appointment_slot_id" class="d-none"></select>
+                        <!-- Hidden inputs for selected time -->
+                        <input type="hidden" name="start_time" id="start-time-input">
+                        <input type="hidden" name="end_time" id="end-time-input">
 
                         <div class="col-md-12 mb-3">
                             <textarea
@@ -150,7 +160,8 @@
             const slotSection = document.getElementById('time-section');
             const availableSlots = document.getElementById('available-slots');
             const selectedSlot = document.getElementById('selected-slot');
-            const slotSelect = document.getElementById('appointment-slot');
+            const startTimeInput = document.getElementById('start-time-input');
+            const endTimeInput = document.getElementById('end-time-input');
 
             flatpickr("#appointment-date", {
                 dateFormat: "Y-m-d",
@@ -177,11 +188,10 @@
                 onChange: function (selectedDates, dateStr) {
                     if (!dateStr) return;
 
-
                     availableSlots.innerHTML = '';
                     selectedSlot.innerHTML = '';
-                    slotSelect.innerHTML = '<option value="">Seçiniz</option>';
-
+                    startTimeInput.value = '';
+                    endTimeInput.value = '';
 
                     slotSection.classList.remove('d-none');
 
@@ -195,28 +205,33 @@
                             }
 
                             slots.forEach(slot => {
-                                const start = slot.start_time.substring(0, 5);
-                                const end = slot.end_time.substring(0, 5);
+                                // Zap returns {start_time: '09:00', end_time: '09:45', available: true/false} format
+                                const start = slot.start_time;
+                                const end = slot.end_time;
+                                const isAvailable = slot.available !== false;
 
                                 const badge = document.createElement('span');
                                 badge.className = 'badge-slot';
                                 badge.textContent = `${start} - ${end}`;
-                                badge.dataset.id = slot.id;
+                                badge.dataset.start = start;
+                                badge.dataset.end = end;
 
-                                badge.addEventListener('click', () => {
-                                    document.querySelectorAll('.badge-slot').forEach(b => b.classList.remove('active'));
-                                    badge.classList.add('active');
+                                // Eğer slot müsait değilse disabled yap
+                                if (!isAvailable) {
+                                    badge.classList.add('disabled');
+                                    badge.title = 'Bu saat dolu';
+                                } else {
+                                    badge.addEventListener('click', () => {
+                                        document.querySelectorAll('.badge-slot').forEach(b => b.classList.remove('active'));
+                                        badge.classList.add('active');
 
-                                    selectedSlot.innerHTML = `Seçilen Saat: <strong>${start} - ${end}</strong>`;
-                                    slotSelect.value = slot.id;
-                                });
+                                        selectedSlot.innerHTML = `Seçilen Saat: <strong>${start} - ${end}</strong>`;
+                                        startTimeInput.value = start;
+                                        endTimeInput.value = end;
+                                    });
+                                }
 
                                 availableSlots.appendChild(badge);
-
-                                const opt = document.createElement('option');
-                                opt.value = slot.id;
-                                opt.textContent = `${start} - ${end}`;
-                                slotSelect.appendChild(opt);
                             });
                         })
                         .catch(() => {
@@ -227,5 +242,3 @@
         });
     </script>
 @endpush
-
-
