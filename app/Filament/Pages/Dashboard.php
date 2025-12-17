@@ -15,6 +15,7 @@ use Filament\Widgets\StatsOverviewWidget;
 
 class Dashboard extends \Filament\Pages\Dashboard
 {
+    protected static ?int $navigationSort = 1;
 
     public function getWidgets(): array
     {
@@ -31,5 +32,10 @@ class Dashboard extends \Filament\Pages\Dashboard
     public function getColumns(): int|string|array
     {
         return 2;
+    }
+
+    public static function getSort(): int
+    {
+        return (int) (static::$navigationSort ?? 0);
     }
 }
