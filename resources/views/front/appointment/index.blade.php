@@ -19,26 +19,23 @@
             background-color: var(--base-color);;
             color: white;
         }
-
-        .badge-slot.active {
-            background-color: var(--base-color);
-            color: white;
-            border-color: var(--base-color);
-            font-weight: 600;
-        }
-
-        .badge-slot.disabled {
-            background-color: #e9ecef;
-            color: #6c757d;
-            cursor: not-allowed;
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
         #available-slots {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
+        }
+
+        .badge-slot.disabled {
+            background-color: #e9ecef;
+            color: #adb5bd;
+            cursor: not-allowed;
+            border: 1px solid #dee2e6;
+        }
+
+        .badge-slot.active {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
         }
     </style>
 @endpush
@@ -117,11 +114,9 @@
                             <label class="form-label fw-bold mb-2">Uygun Saatler</label>
                             <div id="available-slots" class="d-flex flex-wrap gap-2"></div>
 
-                            <!-- Seçilen saat bilgisi -->
                             <div id="selected-slot" class="mt-2 text-primary fw-semibold"></div>
                         </div>
 
-                        <!-- Hidden inputs for selected time -->
                         <input type="hidden" name="start_time" id="start-time-input">
                         <input type="hidden" name="end_time" id="end-time-input">
 
@@ -165,62 +160,51 @@
 
             flatpickr("#appointment-date", {
                 dateFormat: "Y-m-d",
-                minDate: "{{today()}}",
-                locale: {
-                    firstDayOfWeek: 1,
-                    weekdays: {
-                        shorthand: ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'],
-                        longhand: ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'],
-                    },
-                    months: {
-                        shorthand: ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'],
-                        longhand: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
-                    },
-                    ordinal: function () {
-                        return ".";
-                    },
-                    rangeSeparator: " – ",
-                    weekAbbreviation: "Hf",
-                    scrollTitle: "Kaydırarak değiştir",
-                    toggleTitle: "Tıklayarak değiştir",
-                    amPM: ["ÖÖ", "ÖS"]
-                },
+                minDate: "today",
+                locale: "tr",
                 onChange: function (selectedDates, dateStr) {
                     if (!dateStr) return;
 
-                    availableSlots.innerHTML = '';
+                    availableSlots.innerHTML = '<div class="spinner-border text-primary sm" role="status"></div>';
                     selectedSlot.innerHTML = '';
                     startTimeInput.value = '';
                     endTimeInput.value = '';
-
                     slotSection.classList.remove('d-none');
 
                     axios.get(`{{route('appointment-slots.by-date')}}`, {params: {date: dateStr}})
                         .then(response => {
-                            const slots = response.data;
+                            const slots = response.data.data;
+                            availableSlots.innerHTML = '';
 
-                            if (slots.length === 0) {
+                            if (!slots || slots.length === 0) {
                                 availableSlots.innerHTML = '<span class="text-muted">Bu tarihte uygun saat yok.</span>';
                                 return;
                             }
 
                             slots.forEach(slot => {
-                                // Zap returns {start_time: '09:00', end_time: '09:45', available: true/false} format
                                 const start = slot.start_time;
                                 const end = slot.end_time;
-                                const isAvailable = slot.available !== false;
+
+                                const isAvailable = slot.available;
 
                                 const badge = document.createElement('span');
                                 badge.className = 'badge-slot';
                                 badge.textContent = `${start} - ${end}`;
-                                badge.dataset.start = start;
-                                badge.dataset.end = end;
 
-                                // Eğer slot müsait değilse disabled yap
                                 if (!isAvailable) {
                                     badge.classList.add('disabled');
-                                    badge.title = 'Bu saat dolu';
+
+                                    if (slot.is_past) {
+                                        badge.title = 'Bu saatin vakti geçmiş';
+                                        badge.classList.add('past-slot');
+                                    } else if (slot.is_booked) {
+                                        badge.title = 'Bu saat dolu';
+                                        badge.classList.add('booked-slot');
+                                    } else {
+                                        badge.title = 'Seçilemez';
+                                    }
                                 } else {
+                                    badge.style.cursor = 'pointer';
                                     badge.addEventListener('click', () => {
                                         document.querySelectorAll('.badge-slot').forEach(b => b.classList.remove('active'));
                                         badge.classList.add('active');
@@ -234,8 +218,9 @@
                                 availableSlots.appendChild(badge);
                             });
                         })
-                        .catch(() => {
-                            availableSlots.innerHTML = '<span class="text-danger">Saatler yüklenirken hata oluştu.</span>';
+                        .catch(error => {
+                            console.error('Hata:', error);
+                            availableSlots.innerHTML = '<span class="text-danger">Saatler yüklenirken bir hata oluştu.</span>';
                         });
                 }
             });

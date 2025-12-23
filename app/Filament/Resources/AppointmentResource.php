@@ -49,7 +49,7 @@ class AppointmentResource extends Resource
                                 ->reactive()
                                 ->native(false)
                                 ->placeholder('Randevu Tarihi Seçiniz')
-                                ->minDate(now())
+                                ->minDate(today()->timezone('Europe/Istanbul'))
                                 ->afterStateUpdated(fn (callable $set) => $set('time_slot', null)),
 
                             Select::make('time_slot')
@@ -65,14 +65,12 @@ class AppointmentResource extends Resource
                                     if (!$date) {
                                         return [];
                                     }
-
-                                    // Tarihi Carbon ile düzgün formata çevir (Y-m-d)
-                                    $formattedDate = \Carbon\Carbon::parse($date)->format('Y-m-d');
-
+                                    $formattedDate = Carbon::parse($date)->timezone('Europe/Istanbul')->format('Y-m-d');
                                     $service = new BookAppointmentService();
                                     $slots = $service->getAvailableSlots($formattedDate);
 
                                     return collect($slots)
+                                        ->sortBy('start_time')
                                         ->filter(fn ($slot) => $slot['is_available'] ?? false)
                                         ->mapWithKeys(fn ($slot) => [
                                             $slot['start_time'] . '-' . $slot['end_time'] =>
@@ -80,10 +78,25 @@ class AppointmentResource extends Resource
                                         ])
                                         ->toArray();
                                 })
+                                ->disableOptionWhen(function (string $value, callable $get) {
+                                    $date = $get('appointment_date');
+                                    if (!$date) return false;
+
+                                    $istanbulNow = now('Europe/Istanbul');
+                                    $formattedDate = Carbon::parse($date)->timezone('Europe/Istanbul')->format('Y-m-d');
+
+                                    if ($formattedDate === $istanbulNow->format('Y-m-d')) {
+                                        $startTime = str($value)->before('-')->toString();
+
+                                        return $startTime < $istanbulNow->format('H:i');
+                                    }
+
+                                    return false;
+                                })
                                 ->helperText(fn (callable $get) =>
-                                    $get('appointment_date')
-                                        ? 'Seçilen tarihteki müsait saatler'
-                                        : 'Önce tarih seçin'
+                                $get('appointment_date')
+                                    ? 'Geçmiş saatler otomatik olarak devre dışı bırakılır.'
+                                    : 'Önce tarih seçin'
                                 ),
 
                             TextInput::make('metadata.client_name')
@@ -151,9 +164,9 @@ class AppointmentResource extends Resource
                     ->formatStateUsing(function ($record) {
                         $period = $record->periods->first();
                         if (!$period) return '-';
-                        return Carbon::parse($period->start_time)->format('H:i') .
+                        return Carbon::parse($period->start_time)->timezone('Europe/Istanbul')->format('H:i') .
                                ' - ' .
-                               Carbon::parse($period->end_time)->format('H:i');
+                               Carbon::parse($period->end_time)->timezone('Europe/Istanbul')->format('H:i');
                     }),
 
                 TextColumn::make('metadata.client_name')

@@ -7,43 +7,40 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
-use Zap\Models\Schedule; // Zap'in modelini kullanıyoruz
+use Zap\Models\Schedule;
 
 class UpcomingAppointments extends BaseWidget
 {
-    protected static ?int $sort = 2; // Dashboard'daki sırası
-    protected int | string | array $columnSpan = 'full'; // Tam genişlik
+    protected static ?int $sort = 2;
+    protected int | string | array $columnSpan = 'full';
     protected static ?string $heading = 'Yaklaşan Randevular';
 
     public function table(Table $table): Table
     {
         return $table
             ->query(function () {
-                // ManageSchedule'daki mantığın aynısı: Yetkili kullanıcıyı bul
                 $dietician = User::role('super_admin')->first();
 
                 if (!$dietician) {
-                    return Schedule::query()->whereNull('id'); // Boş döndür
+                    return Schedule::query()->whereNull('id');
                 }
 
                 return Schedule::query()
-                    ->where('type', 'appointment') // Sadece randevular
-                    ->whereDate('start_date', '>=', now()) // Geçmiş randevular gizlensin
+                    ->where('type', 'appointment')
+                    ->whereDate('start_date', '>=', now())
                     ->orderBy('start_date')
-                    ->orderBy('periods->0->start'); // Saate göre sırala
+                    ->orderBy('periods->0->start');
             })
             ->columns([
-                // 1. Tarih Kolonu
+
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('Randevu Tarihi')
-                    ->date('d F Y, l') // Örn: 15 Ocak 2025, Çarşamba
+                    ->date('d F Y, l')
                     ->sortable(),
 
-                // 2. Saat Aralığı (JSON periods içinden okuma)
                 Tables\Columns\TextColumn::make('periods')
                     ->label('Saat')
                     ->formatStateUsing(function ($state) {
-                        // Zap veriyi [['start'=>'09:00', 'end'=>'09:45']] şeklinde tutar
                         $start = $state[0]['start'] ?? '-';
                         $end = $state[0]['end'] ?? '-';
                         return "{$start} - {$end}";
@@ -51,40 +48,38 @@ class UpcomingAppointments extends BaseWidget
                     ->icon('heroicon-m-clock')
                     ->color('primary'),
 
-                // 3. Hasta Adı (Metadata içinden okuma)
                 Tables\Columns\TextColumn::make('metadata.patient_name')
                     ->label('Hasta Adı')
-                    ->searchable() // İsimle arama yapılabilir
-                    ->description(fn ($record) => $record->metadata['patient_phone'] ?? '') // Altına telefon no
+                    ->searchable()
+                    ->description(fn ($record) => $record->metadata['patient_phone'] ?? '')
                     ->default('İsimsiz Hasta'),
 
-                // 4. Notlar
                 Tables\Columns\TextColumn::make('metadata.notes')
                     ->label('Notlar')
                     ->limit(30)
                     ->tooltip(fn (Tables\Columns\TextColumn $column): ?string => $column->getState()),
 
-                // 5. Durum (Metadata type)
-                Tables\Columns\BadgeColumn::make('metadata.type')
+
+                Tables\Columns\TextColumn::make('metadata.type')
                     ->label('Tür')
+                    ->badge()
                     ->formatStateUsing(fn ($state) => match ($state) {
                         'online_consultation' => 'Online',
                         'face_to_face' => 'Yüz Yüze',
                         default => 'Genel',
                     })
-                    ->colors([
-                        'success' => 'online_consultation',
-                        'warning' => 'face_to_face',
-                    ]),
+                    ->color(fn ($state): string => match ($state) {
+                        'online_consultation' => 'success',
+                        'face_to_face' => 'warning',
+                        default => 'gray',
+                    }),
             ])
             ->actions([
-                // Randevu İptal İşlemi
                 Tables\Actions\DeleteAction::make()
                     ->label('İptal Et')
                     ->modalHeading('Randevuyu İptal Et')
                     ->modalDescription('Bu randevuyu silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve slot tekrar boşa çıkar.')
                     ->after(function () {
-                        // Silindikten sonra bildirim
                         \Filament\Notifications\Notification::make()
                             ->title('Randevu iptal edildi')
                             ->success()
@@ -93,6 +88,6 @@ class UpcomingAppointments extends BaseWidget
             ])
             ->emptyStateHeading('Henüz randevu yok')
             ->emptyStateDescription('Hastalar randevu aldığında burada görünecektir.')
-            ->poll('30s'); // Her 30 saniyede bir tabloyu yenile (yeni randevu gelirse diye)
+            ->poll('30s');
     }
 }

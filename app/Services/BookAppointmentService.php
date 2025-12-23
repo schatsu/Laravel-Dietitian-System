@@ -79,7 +79,10 @@ class BookAppointmentService
 
         $slots = $this->dietitian->getBookableSlots($date, $duration, $buffer);
 
-        $dayOfWeek = strtolower(Carbon::parse($date)->format('l'));
+        $carbonDate = Carbon::parse($date);
+        $dayOfWeek = strtolower($carbonDate->format('l'));
+        $istanbulNow = now('Europe/Istanbul');
+        $isToday = $date === $istanbulNow->format('Y-m-d');
 
         $isDateBlocked = $this->dietitian->blockedSchedules()
             ->where('is_active', true)
@@ -95,26 +98,16 @@ class BookAppointmentService
                 if ($schedule->is_recurring && $schedule->frequency === 'weekly') {
                     $blockedDays = $schedule->frequency_config['days'] ?? [];
                     if (in_array($dayOfWeek, $blockedDays)) {
-                        if ($date >= $startDate && (!$endDate || $date <= $endDate)) {
-                            return true;
-                        }
+                        return ($date >= $startDate && (!$endDate || $date <= $endDate));
                     }
                 }
 
                 if (!$schedule->is_recurring) {
-                    if ($date >= $startDate && (!$endDate || $date <= $endDate)) {
-                        return true;
-                    }
+                    return ($date >= $startDate && (!$endDate || $date <= $endDate));
                 }
 
                 return false;
             });
-
-        if ($isDateBlocked) {
-            return array_map(function ($slot) {
-                return array_merge($slot, ['available' => false]);
-            }, $slots);
-        }
 
         $existingAppointments = $this->dietitian->appointmentSchedules()
             ->with('periods')
@@ -126,21 +119,35 @@ class BookAppointmentService
                         : (string) $period->date;
                     return $periodDate === $date;
                 })->map(function ($period) {
-                    $startTime = substr($period->start_time, 0, 5);
-                    $endTime = substr($period->end_time, 0, 5);
-                    return $startTime . '-' . $endTime;
+                    return substr($period->start_time, 0, 5) . '-' . substr($period->end_time, 0, 5);
                 });
             })
             ->toArray();
 
-        return array_map(function ($slot) use ($existingAppointments) {
-            $slotKey = $slot['start_time'] . '-' . $slot['end_time'];
+        $processedSlots = array_map(function ($slot) use ($existingAppointments, $isDateBlocked, $isToday, $istanbulNow) {
+            $startTime = substr($slot['start_time'], 0, 5);
+            $endTime = substr($slot['end_time'], 0, 5);
+            $slotKey = $startTime . '-' . $endTime;
+
             $isBooked = in_array($slotKey, $existingAppointments);
 
-            return array_merge($slot, [
-                'available' => !$isBooked,
-            ]);
+            $isPast = $isToday && ($startTime < $istanbulNow->format('H:i'));
+
+            return [
+                'start_time' => $startTime,
+                'end_time'   => $endTime,
+                'is_booked'  => $isBooked,
+                'is_past'    => $isPast,
+                'is_blocked' => $isDateBlocked,
+                'available'  => !$isDateBlocked && !$isBooked && !$isPast,
+            ];
         }, $slots);
+
+        usort($processedSlots, function ($a, $b) {
+            return $a['start_time'] <=> $b['start_time'];
+        });
+
+        return $processedSlots;
     }
 
     public function getSessionSettings(): array

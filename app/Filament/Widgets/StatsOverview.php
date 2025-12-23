@@ -21,43 +21,36 @@ class StatsOverview extends BaseWidget
     protected function getStats(): array
     {
         return [
-            $this->buildTrendStat(Client::class, 'Toplam Danışan'),
-
             $this->buildAppointmentStat('Toplam Randevu'),
+            $this->buildAppointmentStat('Onay Bekleyen Randevu', 'pending'),
 
             $this->buildAppointmentStat('Onaylanan Randevu', 'approved'),
 
             $this->buildAppointmentStat('Reddedilen Randevu', 'rejected'),
 
-            $this->buildTrendStat(Service::class, 'Toplam Hizmet'),
+            $this->buildTrendStat(Client::class, 'Toplam Danışan'),
 
             $this->buildTrendStat(Blog::class, 'Toplam Blog'),
         ];
     }
 
-    /**
-     * Randevu istatistiklerini Schedule modeli üzerinden oluştur
-     */
+
     protected function buildAppointmentStat(string $label, ?string $status = null): Stat
     {
         $dietitian = User::role('super_admin')->first();
 
-        // Base query for appointments
         $baseQuery = fn() => Schedule::query()
             ->where('schedulable_type', User::class)
             ->where('schedulable_id', $dietitian?->id)
             ->where('schedule_type', ScheduleTypes::APPOINTMENT);
 
-        // Apply status filter if provided
         $query = $baseQuery();
         if ($status) {
             $query->whereJsonContains('metadata->status', $status);
         }
 
-        // Total count
         $totalCount = (clone $query)->count();
 
-        // Chart data for last 7 days
         $chartData = collect(range(6, 0))->map(function ($i) use ($baseQuery, $status) {
             $dayQuery = $baseQuery()->whereDate('start_date', Carbon::today()->subDays($i));
             if ($status) {
@@ -66,7 +59,6 @@ class StatsOverview extends BaseWidget
             return $dayQuery->count();
         })->toArray();
 
-        // Today vs yesterday comparison
         $todayQuery = $baseQuery()->whereDate('start_date', Carbon::today());
         $yesterdayQuery = $baseQuery()->whereDate('start_date', Carbon::yesterday());
 
@@ -78,7 +70,6 @@ class StatsOverview extends BaseWidget
         $todayCount = $todayQuery->count();
         $yesterdayCount = $yesterdayQuery->count();
 
-        // Calculate trend
         $increasePercent = 0;
         if ($yesterdayCount > 0) {
             $increasePercent = (($todayCount - $yesterdayCount) / $yesterdayCount) * 100;
@@ -107,9 +98,6 @@ class StatsOverview extends BaseWidget
             ->color($color);
     }
 
-    /**
-     * Genel model istatistiklerini oluştur
-     */
     protected function buildTrendStat(string $model, string $label, ?Closure $modifyQuery = null): Stat
     {
         $query = $model::query();

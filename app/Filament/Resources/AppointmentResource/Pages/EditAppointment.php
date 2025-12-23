@@ -6,6 +6,7 @@ use App\Filament\Resources\AppointmentResource;
 use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
 
 class EditAppointment extends EditRecord
 {
@@ -22,18 +23,16 @@ class EditAppointment extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        // Schedule'dan form için veri hazırla
         $schedule = $this->record;
         $period = $schedule->periods->first();
 
         if ($period) {
-            $startTime = Carbon::parse($period->start_time)->format('H:i');
-            $endTime = Carbon::parse($period->end_time)->format('H:i');
+            $startTime = Carbon::parse($period->start_time)->timezone('Europe/Istanbul')->format('H:i');
+            $endTime = Carbon::parse($period->end_time)->timezone('Europe/Istanbul')->format('H:i');
             $data['time_slot'] = $startTime . '-' . $endTime;
             $data['appointment_date'] = $schedule->start_date;
         }
 
-        // Metadata'yı form için hazırla
         $metadata = $schedule->metadata ?? [];
         $data['metadata'] = [
             'client_name' => $metadata['client_name'] ?? $schedule->name,
@@ -46,17 +45,15 @@ class EditAppointment extends EditRecord
         return $data;
     }
 
-    protected function handleRecordUpdate(\Illuminate\Database\Eloquent\Model $record, array $data): \Illuminate\Database\Eloquent\Model
+    protected function handleRecordUpdate(Model $record, array $data): Model
     {
-        // Zaman slotunu parse et
         $timeSlot = $data['time_slot'] ?? null;
 
         if ($timeSlot) {
             [$startTime, $endTime] = explode('-', $timeSlot);
-            $startTime = Carbon::parse(trim($startTime))->format('H:i:s');
-            $endTime = Carbon::parse(trim($endTime))->format('H:i:s');
+            $startTime = Carbon::parse(trim($startTime))->timezone('Europe/Istanbul')->format('H:i:s');
+            $endTime = Carbon::parse(trim($endTime))->timezone('Europe/Istanbul')->format('H:i:s');
 
-            // Period'ları güncelle
             $record->periods()->delete();
             $record->periods()->create([
                 'date' => $data['appointment_date'],
@@ -66,7 +63,6 @@ class EditAppointment extends EditRecord
             ]);
         }
 
-        // Schedule'ı güncelle
         $metadata = $data['metadata'] ?? [];
         $record->update([
             'name' => ($metadata['client_name'] ?? 'Randevu') . ' - Randevu',
