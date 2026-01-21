@@ -26,10 +26,5 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('safeBlank', function () {
             return 'target="_blank" rel="noopener noreferrer"';
         });
-
-        // Super admin gets all permissions, other roles are restricted by policies
-        Gate::before(function ($user, $ability) {
-            return $user->hasRole('super_admin') ? true : null;
-        });
     }
 }
